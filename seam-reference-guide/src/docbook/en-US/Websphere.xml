@@ -1,0 +1,627 @@
+<chapter id="websphere">
+	<title>Seam on IBM's WebSphere AS v7</title>
+
+	<section>
+	  <title>WebSphere AS environment and version recommendation</title>
+
+      <para>
+        WebSphere Application Server v7 is IBM's application server offering. 
+        This release is fully Java EE 5 certified.
+      </para>
+
+	  <para>
+		WebSphere AS being a commercial product, we will not discuss the
+		details of its installation. At best, we will instruct you to follow the directions
+		provided by your particular installation type and license. 
+      </para>
+
+      <para>
+       First, we will go over some basic considerations on how to run Seam applications under WebSphere AS v7.
+       We will go over the details of these steps using the JEE5 booking example.
+       We will also deploy the JPA (non-EJB3) example application. 
+      </para>
+
+	  <para>
+	    All of the examples and information in this chapter are based on
+		WebSphere AS v7. A trial version can be downloaded here :
+        <ulink url="http://www.ibm.com/developerworks/downloads/ws/was"> WebSphere Application Server V7</ulink>
+	  </para>
+	  <para>
+		WebSphere v7.0.0.5 is the minimal version of WebSphere v7 to use
+		with Seam. WAS v7.0.0.9 is highly recommended. Earlier versions of WebSphere have bugs in the EJB container that will 
+		cause various exceptions to occur at runtime. 
+      </para>
+      
+      <note>
+       You may encounter two exceptions with Seam on WebSphere v7.0.0.5 :
+       <variablelist>
+         <varlistentry>
+           <term>
+             <literal>EJBContext may only be looked up by or injected into an EJB</literal>
+           </term>
+           <listitem>
+             <para>
+               This is a bug in WebSphere v7.0.0.5. WebSphere does not conform to the EJB 3.0 specs 
+               as it does not allow to perform a lookup on "java:comp/EJBContext" in callback methods.
+             </para>
+             <para>
+               This problem is associated with APAR PK98746 at IBM and is corrected in v7.0.0.9. 
+             </para>
+           </listitem>
+         </varlistentry>
+
+         <varlistentry>
+           <term>
+             <literal>NameNotFoundException: Name "comp/UserTransaction" not found in context "java:"</literal>
+           </term>
+           <listitem>
+             <para>
+               Another bug in WebSphere v7.0.0.5. This occurs when an HTTP session expires. Seam correctly catches the exception when
+               necessary and performs the correct actions in these cases. The problem is that even if the exception is handled by Seam,
+               WebSphere prints the traceback of the exception in SystemOut.
+               Those messages are harmless and can safely be ignored. 
+             </para>
+             <para>
+               This problem is associated with APAR PK97995 at IBM and is corrected in v7.0.0.9. 
+             </para> 
+           </listitem>
+         </varlistentry>
+         
+        </variablelist>
+      </note>
+
+	  <para>
+        The following sections in this chapter assume that WebSphere is correctly installed and is
+		functional, and a WebSphere "profile" has been successfully created.	
+      </para>
+      
+	  <para>
+        This chapter explains how to compile, deploy and run some sample applications in WebSphere. These sample applications require
+        a database. WebSphere comes by default with a set of sample applications called "Default Application". This set of sample applications
+        use a Derby database running on the Derby instance installed within WebSphere. In order to keep this simple we'll use this Derby database created 
+        for the "Default Applications". However, to run the sample application with the Derby database "as-is", a patched Hibernate
+        dialect must be used (The patch changes the default "auto" key generation strategy) as explained in <xref linkend="glassfish" />.
+        If you want to use another database, it's just a matter of creating a connection pool in WebSphere pointing to this database,
+        declare the correct Hibernate dialect and set the correct JNDI name in <literal>persistence.xml</literal>.  
+      </para>
+   </section>
+   
+
+   <section>
+     <title>Configuring the WebSphere Web Container</title>
+     <para>
+       This step is mandatory in order to have Seam applications run with WebSphere v7.
+       Two extra properties must be added to the Web Container. Please refer to the IBM WebSphere Information Center for further explanations on those properties.
+     </para>
+     <para> 
+       To add the extra properties: 
+       <itemizedlist>
+         <listitem>
+           Open the WebSphere administration console
+         </listitem>
+         <listitem>
+           Select the <literal>Servers/Server Types/WebSphere Application Servers</literal> in the left navigation menu
+         </listitem>
+         <listitem>
+           Click on the server name (<literal>server1</literal>)
+         </listitem>
+         <listitem>
+           On the right navigation menu, select <literal>Web Container Settings/Web container</literal>
+         </listitem>
+         <listitem>
+           On the right navigation menu, select <literal>custom properties</literal> and add the following properties:
+           <itemizedlist>
+           <listitem>
+             <literal>prependSlashToResource = true</literal>
+           </listitem>
+           <listitem>
+             <literal>com.ibm.ws.webcontainer.invokefilterscompatibility = true</literal>
+           </listitem>
+          </itemizedlist>
+         </listitem>
+         <listitem>
+           Save the configuration and restart the server
+         </listitem>
+       </itemizedlist>
+     </para>
+    </section>
+
+	<section id="websphere-jndi-section">
+	  <title>Seam and the WebSphere JNDI name space</title>
+      <para>
+        In order to use component injection, Seam needs to know how to lookup for session beans bound to the JNDI name space. 
+        Seam provides two mechanisms to configure the way it will search for such resources:
+      </para>
+      <itemizedlist>
+        <listitem>
+          The global <literal>jndi-pattern</literal> switch on the <literal>&lt;core:init&gt;</literal>tag in <literal>components.xml</literal>. 
+		  The switch can use a special placeholder "<literal>#{ejbName}</literal>" that resolves to the unqualified name of the EJB
+	    </listitem>
+		<listitem>
+          The <literal>@JndiName</literal> annotation
+	    </listitem>
+      </itemizedlist>
+      <para>
+        <xref linkend="config.integration.ejb.container"/> gives detailed explanations on how those mechanisms work.
+      </para>
+      
+      <para>
+        By default, WebSphere will bind session beans in
+		its local JNDI name space under a "short" binding name that adheres to the following pattern  
+        <literal>ejblocal:&lt;package.qualified.local.interface.name&gt;</literal>.
+      </para>
+      <para>
+        For a detailed description on how WebSphere v7 organizes and binds EJBs in its JNDI name spaces, please refer to the WebSphere Information Center.  
+	  </para>
+	  <para>
+        As explained before, Seam needs to lookup for session bean as they appear in JNDI. 
+        Basically, there are three strategies, in order of complexity:
+      </para>
+      <itemizedlist>
+         <listitem>
+           Specify which JNDI name Seam must use for each session bean using the <literal>@JndiName</literal> annotation in the java source file,
+         </listitem>
+		 <listitem>
+		   Override the default session bean names generated by WebSphere to conform to the <literal>jndi-pattern</literal> attribute,
+         </listitem>
+         <listitem>
+           Use EJB references.
+         </listitem>
+        </itemizedlist>
+
+      <section id="was.strategy1">
+        <title>Strategy 1: Specify which JNDI name Seam must use for each Session Bean</title>
+        This strategy is the simplest and fastest one regarding development. It uses the WebSphere v7 default binding mechanism. To use this strategy:
+        <itemizedlist>
+          <listitem>
+              Add a <literal>@JndiName("ejblocal:&lt;package.qualified.local.interface.name&gt;)</literal> annotation to each session bean that is a Seam component.
+          </listitem>
+          <listitem>
+            In <literal>components.xml</literal>, add the following line:
+           <programlisting language="xml" role="XML"><![CDATA[<core:init jndi-name="java:comp/env/#{ejbName}" />]]></programlisting>
+          </listitem>
+          <listitem>
+              Add a file named <literal>WEB-INF/classes/seam-jndi.properties</literal> in the web module with the following content:
+               <programlisting>com.ibm.websphere.naming.hostname.normalizer=com.ibm.ws.naming.util.DefaultHostnameNormalizer
+java.naming.factory.initial=com.ibm.websphere.naming.WsnInitialContextFactory
+com.ibm.websphere.naming.name.syntax=jndi
+com.ibm.websphere.naming.namespace.connection=lazy
+com.ibm.ws.naming.ldap.ldapinitctxfactory=com.sun.jndi.ldap.LdapCtxFactory
+com.ibm.websphere.naming.jndicache.cacheobject=populated
+com.ibm.websphere.naming.namespaceroot=defaultroot
+com.ibm.ws.naming.wsn.factory.initial=com.ibm.ws.naming.util.WsnInitCtxFactory
+com.ibm.websphere.naming.jndicache.maxcachelife=0
+com.ibm.websphere.naming.jndicache.maxentrylife=0
+com.ibm.websphere.naming.jndicache.cachename=providerURL
+java.naming.provider.url=corbaloc:rir:/NameServiceServerRoot
+java.naming.factory.url.pkgs=com.ibm.ws.runtime:com.ibm.ws.naming</programlisting>
+          </listitem>
+          <listitem>
+              At the end of <literal>web.xml</literal>, add the following lines:
+              <programlisting role="XML"><![CDATA[<ejb-local-ref>
+   <ejb-ref-name>EjbSynchronizations</ejb-ref-name>
+   <ejb-ref-type>Session</ejb-ref-type>
+   <local-home></local-home>
+   <local>org.jboss.seam.transaction.LocalEjbSynchronizations</local>
+ </ejb-local-ref>]]></programlisting>
+          </listitem>
+        </itemizedlist>
+        <para>
+          That's all folks! No need to update any file during the development, nor to define any EJB to EJB or web to EJB reference!
+        </para>
+        <para>
+		    Compared to the other strategies, this strategy has the advantage to not have to manage any EJBs reference and also to not have to maintain extra files.
+		    The only drawback is one extra line in the java source code with the <literal>@JndiName</literal> annotation
+        </para>
+	  </section>
+     
+      <section>
+        <title>Strategy 2: Override the default names generated by WebSphere</title>
+		  There is no simple way to globally override the default naming strategy for session beans in WebSphere. 
+          However, WebSphere provides a way to override the name of each bean.
+        <para>
+           To use this strategy:
+        </para>
+         <itemizedlist>
+          <listitem>
+            Add a file named <literal>META-INF/ibm-ejb-jar-bnd.xml</literal> in the EJB module and add an entry for each session bean like this:
+            <programlisting role="XML"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<ejb-jar-bnd
+  xmlns="http://websphere.ibm.com/xml/ns/javaee"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://websphere.ibm.com/xml/ns/javaee 
+                      http://websphere.ibm.com/xml/ns/javaee/ibm-ejb-jar-bnd_1_0.xsd"
+  version="1.0">
+
+ <session name="AuthenticatorAction" simple-binding-name="AuthenticatorAction" />
+ <session name="BookingListAction" simple-binding-name="BookingListAction" />
+ 
+</ejb-jar-bnd>]]></programlisting>
+          WebSphere will then bind the <literal>AuthenticatorAction</literal> EJB to the <literal>ejblocal:AuthenticatorAction</literal> JNDI name
+          </listitem>
+          <listitem>
+            In <literal>components.xml</literal>, add the following line:
+            <programlisting role="XML"><![CDATA[<core:init jndi-name="ejblocal:#{ejbName}" />]]></programlisting>
+          </listitem>
+          <listitem>
+            Add a file named <literal>WEB-INF/classes/seam-jndi.properties</literal> as described in strategy 1
+          </listitem>
+          <listitem>
+            In <literal>web.xml</literal>, add the following lines (Note the different <literal>ejb-ref-name</literal> value):
+            <programlisting role="XML"><![CDATA[<ejb-local-ref>
+   <ejb-ref-name>ejblocal:EjbSynchronizations</ejb-ref-name>
+   <ejb-ref-type>Session</ejb-ref-type>
+   <local-home></local-home>
+   <local>org.jboss.seam.transaction.LocalEjbSynchronizations</local>
+ </ejb-local-ref>]]></programlisting>
+          </listitem>
+        </itemizedlist>
+        <para> 
+          Compared to the first strategy, this strategy requires to maintain an extra file 
+          (<literal>META-INF/ibm-ejb-jar-ext.xml</literal>), 
+          where a line must be added  each time a new session bean is added to the application),
+          but still does not require to maintain EJB reference between beans.
+        </para>
+      </section>
+      
+	  <section>
+		  <title>Strategy 3: Use EJB references</title>
+           This strategy is based on the usage of EJB references, from EJB to EJB and from the web module to EJB. To use it:
+           <itemizedlist>
+            <listitem>
+                In <literal>components.xml</literal>, add the following line:
+                <programlisting role="XML"><![CDATA[<core:init jndi-name="java:comp/env/#{ejbName}" />]]></programlisting>
+            </listitem>
+            <listitem>
+              Follow the instructions in <xref linkend="config.integration.ejb.container"/> to declare the references from web to EJB and from EJB to EJB
+            </listitem>
+          </itemizedlist>
+          <para>
+           This is the most tedious strategy as each session bean referenced by another session bean (i.e. "injected") as to be declared in 
+           <literal>ejb-jar.xml</literal> file.
+           Also, each new session bean has to be added to the list of referenced bean in <literal>web.xml</literal> 
+         </para>  
+          
+      </section>
+
+	</section>
+
+	<section id="websphere-timeout-section">
+		<title>Configuring timeouts for Stateful Session Beans</title>
+         A timeout value has to be set for each stateful session bean used in the application because stateful bean must not expire in WebSphere while Seam 
+         might still need them.
+         At the time of writing this document, WebSphere does not provide a way to configure a global timeout at neither the cluster, 
+         server, application nor ejb-jar level. It has to be done for each stateful bean individually. By default, the default timeout is 10 minutes.
+         This is done by adding a file named <literal>META-INF/ibm-ejb-jar-ext.xml</literal> in the EJB module, and declare the timeout value for each bean:
+         <programlisting role="XML"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<ejb-jar-ext 
+  xmlns="http://websphere.ibm.com/xml/ns/javaee"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://websphere.ibm.com/xml/ns/javaee 
+                      http://websphere.ibm.com/xml/ns/javaee/ibm-ejb-jar-ext_1_0.xsd"
+  version="1.0">
+
+  <session name="BookingListAction"><time-out value="605"/></session>
+  <session name="ChangePasswordAction"><time-out value="605"/></session>
+   
+</ejb-jar-ext>]]></programlisting>
+      <para>
+         The <literal>time-out</literal> is expressed in seconds and must be higher than the Seam conversation expiration timeout 
+         and a few minutes higher than the user's HTTP session timeout (The session expiration timeout can trigger a few minutes
+         after the number of minutes declared to expire the HTTP session).   
+	  </para>
+	</section>
+
+
+    <section id="jee5-websphere-section">
+	  <title>The <literal>jee5/booking</literal> example</title>
+
+      <para>
+        The<literal>jee5/booking</literal>example is based on the Hotel	Booking example (which runs on JBoss AS). 
+        Out of the box, it is designed to run on Glassfish, but with the following steps, it can be deployed on 
+        WebSphere. It is located in the <literal>$SEAM_DIST/examples/jee5/booking</literal> directory.
+	  </para>
+     
+      <para>
+          The example already has a breakout of configurations and build scripts for WebSphere. First thing, we are going to do
+           is build and deploy this example. Then we'll go over some key changes that we needed.
+      </para>
+     
+      <para>
+        The tailored configuration files for WebSphere use the second JNDI mapping strategy ("Override the default names generated by WebSphere") 
+        as the goal was to not change any java code to add the <literal>@JndiName</literal> annotation as in the first strategy. 
+      </para>
+       
+      <section>
+        <title>Building the <literal>jee5/booking</literal> example</title>
+			
+        <para>
+          Building it only requires running the correct ant command: <programlisting>ant -f build-websphere7.xml</programlisting>
+          This will create container specific distribution and exploded archive directories with the <literal>websphere7</literal> label.
+        </para>
+      </section>
+        
+      <section id="jee5-websphere-deploy">
+        <title>Deploying the <literal>jee5/booking</literal> example</title>
+        <para>  
+          The steps below are for the WAS version stated above.The ports are the default values, if you changed them, you must substitute the values.
+          <orderedlist>
+			<listitem>
+               Log in to the administration console
+               <programlisting><![CDATA[http://localhost:9060/admin]]></programlisting>
+               Enter your userid and/or your password if security is enabled for the console.
+            </listitem>
+              
+            <listitem>
+              Go to the <literal>WebSphere enterprise applications</literal> menu option under the <literal>Applications --> Application Type</literal>
+              left side menu.
+            </listitem>
+              
+            <listitem>
+              <para>
+                At the top of the	<literal>Enterprise	Applications</literal>	table select <literal>Install</literal>. 
+                Below are installation wizard pages and what needs to done on each:
+                <itemizedlist>
+                  <listitem>
+                    <para>
+                      <literal>Preparing for the application installation</literal>
+                      <itemizedlist>
+                        <listitem>
+                          <para>
+                            Browse to the <literal>examples/jee5/booking/dist-websphere7/jboss-seam-jee5.ear</literal>
+                            file using the file upload widget.
+                          </para>
+                        </listitem>
+                        <listitem>
+                          <para>
+                            Select the <literal>Next</literal> button.
+                          </para>
+                        </listitem>
+                        <listitem>
+                          <para>
+                            Select the <literal>Fast Path</literal> button.
+                          </para>
+                        </listitem>
+                        <listitem>
+                          <para>
+                            Select the <literal>Next</literal> button.
+                          </para>
+                        </listitem>
+                      </itemizedlist>
+                    </para>
+                  </listitem>
+                  <listitem>
+                    <para>
+                      <literal>Select installation options</literal>
+                      <itemizedlist>
+                        <listitem>
+                          <para>
+                            Select the "<literal>Allow EJB reference targets to resolve automatically</literal>"
+                            check boxes at the bottom of the page. This will let WebSphere use its simplified JNDI reference mapping.
+                          </para>
+                        </listitem>
+                        <listitem>
+                          <para>
+                            Select the <literal>Next</literal> button.
+                          </para>
+                        </listitem>
+                      </itemizedlist>
+                    </para>
+                  </listitem>
+                  <listitem>
+                    <para>
+                      <literal>Map modules to servers</literal>
+                      <itemizedlist>
+                        <listitem>
+                          <para>
+                            No changes needed here as we only have one server. Select the <literal>Next</literal>button.
+                          </para>
+                        </listitem>
+                      </itemizedlist>
+                    </para>
+                  </listitem>
+                  <listitem>
+                    <para>
+                      <literal>Map virtual hosts for Web modules</literal>
+                      <itemizedlist>
+                        <listitem>
+                          <para>
+                            No changes needed here as we only have one virtual host. Select the <literal>Next</literal>button.
+                          </para>
+                        </listitem>
+                      </itemizedlist>
+                    </para>
+                  </listitem>
+                  <listitem>
+                    <para>
+                      <literal>Summary</literal>
+                      <itemizedlist>
+                        <listitem>
+                          <para>No changes needed here. Select the <literal>Finish</literal> button.</para>
+                        </listitem>
+                      </itemizedlist>
+                    </para>
+                  </listitem>
+                  <listitem>
+                    <para>
+                      <literal>Installation</literal>
+                      <itemizedlist>
+                        <listitem>
+                           <para>Now you will see WebSphere installing and deploying your application.</para>
+                        </listitem>
+                        <listitem>
+                          <para>
+                            When done, select the <literal>Save</literal> link and you will be returned to the
+                            <literal>Enterprise Applications</literal> table.
+                          </para>
+                        </listitem>
+                      </itemizedlist>
+                    </para>
+                  </listitem>
+                  <listitem>
+                    <para>
+                      To start the application, select the application in the list, then click on the <literal>Start</literal>
+                       button at the top of the table.
+                    </para>
+                  </listitem>
+                </itemizedlist>
+              </para>
+            </listitem>
+          
+            <listitem>
+              <para>
+                You can now access the application at <literal>http://localhost:9080/seam-jee5-booking</literal>
+              </para>
+            </listitem>
+          </orderedlist>
+        </para>
+      </section>
+      
+      <section>
+        <title>Deviation from the original base files</title>
+        Below are the differences between the base configuration files and the WebSphere specific files held in the <literal>resources-websphere7</literal> directory.
+        <itemizedlist>
+          <listitem>
+            <para>
+              <literal>META-INF/ejb-jar.xml</literal>
+              &#8212; Removed all the EJB references
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+              <literal>META-INF/ibm-ejb-jar-bnd.xml</literal>
+              &#8212; This WebSphere specific file has been added as we use the second JNDI mapping strategy. 
+              It defines, for each session bean, the name WebSphere will use to bind it in its JNDI name space
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+              <literal>META-INF/ibm-ejb-jar-ext.xml</literal>
+              &#8212; This WebSphere specific file defines the timeout value for each stateful bean 
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+              <literal>META-INF/persistence.xml</literal>
+              &#8212; The main changes here are for the datasource JNDI path,
+              switching to the WebSphere transaction manager lookup class,
+              turning off the <literal>hibernate.transaction.flush_before_completion</literal> toggle,
+              and forcing the Hibernate dialect to be <literal>GlassfishDerbyDialect</literal>
+              as we are using the integrated Derby database
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+              <literal>WEB-INF/components.xml</literal>
+              &#8212; the change here is <literal>jndi-pattern</literal>
+              to use <literal>ejblocal:#{ejbname}</literal> as using the second 
+              JNDI matching strategy
+            </para>
+          </listitem>
+          <listitem>
+          <para>
+            <literal>WEB-INF/web.xml</literal>
+              &#8212; Remove all the <literal>ejb-local ref</literal> except the one for
+              <literal>EjbSynchronizations</literal> bean.
+              Changed the ref fo this bean to <literal>ejblocal:EjbSynchronizations</literal>
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+              <literal>import.sql</literal>
+              &#8212; due to the customized hibernate Derby dialect, the <literal>ID</literal>
+              column can not be populated by this file and was removed.
+            </para>
+          </listitem>
+        </itemizedlist>
+        <para>
+          Also the build procedure has been changed to include the <literal>log4j.jar</literal> file
+          and exclude the <literal>concurrent.jar</literal> and <literal>jboss-common-core.jar</literal> files.
+        </para>
+        
+      </section>
+    </section>
+
+
+
+
+    <section>
+      <title>The <literal>jpa</literal> booking example</title>
+        
+        <para>
+			This is the Hotel Booking example implemented in Seam POJOs and using Hibernate JPA
+			with JPA transactions. It does not use EJB3.
+		</para>
+
+		<para>
+          The example already has a breakout of configurations and build
+          scripts for many of the common containers including WebSphere.
+        </para>
+
+		<para>
+          First thing, we are going to do is build and deploy that example. 
+          Then we'll go over some key changes that we needed.
+        </para>
+
+		<section>
+          <title>Building the <literal>jpa</literal> example</title>
+          <para>
+            Building it only requires running the correct ant command:
+            <programlisting>ant websphere7</programlisting>
+            This will create container specific distribution and exploded archive directories with the
+            <literal>websphere7</literal> label.
+          </para>
+		</section>
+      
+        <section>
+          <title>Deploying the <literal>jpa</literal> example</title>
+          <para>
+            Deploying <literal>jpa</literal> application  is very similar to the <literal>jee5/booking</literal>
+            example at <xref linkend="jee5-websphere-deploy" />.
+            The main difference is, that this time, we will deploy a war file instead of an ear file,
+            and we'll have to manually specify the context root of the application.
+          </para>
+          <para>
+            Follow the same instructions as for the <literal>jee5/booking</literal> sample. Select the   
+            <literal>examples/jpa/dist-websphere7/jboss-seam-jpa.war</literal> file on the first page and on the 
+            <literal>Map context roots for Web modules</literal> page (after the <literal>Map virtual host for Web module</literal>),
+            enter the context root you want to use for your application in the <literal>Context Root</literal> input field. 
+          </para>
+          
+          <para>
+            When started, you can now access the application at the <literal>http://localhost:9080/&lt;context root&gt;</literal>.
+          </para>
+        </section>
+
+      <section>
+        <title>Deviation from the generic base files</title>
+        Below are the configuration file differences between the base configuration files and the files customized
+        for WebSphere held in the <literal>resources-websphere7</literal> directory.
+        <itemizedlist>
+          <listitem>
+            <para>
+              <literal>META-INF/persistence.xml</literal>
+              &#8212; The main changes here are for the datasource JNDI path,
+              switching to the WebSphere transaction manager look up class,
+              turning off the <literal>hibernate.transaction.flush_before_completion</literal> toggle,
+              and forcing the Hibernate dialect to be <literal>GlassfishDerbyDialect</literal>
+              how as using the integrated Derby database
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+              <literal>import.sql</literal>
+              &#8212; due to the customized hibernate Derby dialect, the <literal>ID</literal>
+              column can not be populated by this file and was removed.
+            </para>
+          </listitem>
+        </itemizedlist>
+        <para>
+          Also the build procedure have been changed to include the <literal>log4j.jar</literal> file
+          and exclude the <literal>concurrent.jar</literal> and <literal>jboss-common-core.jar</literal> files.
+        </para>
+        
+      </section>
+    </section>
+
+</chapter>

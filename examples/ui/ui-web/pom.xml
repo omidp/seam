@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <artifactId>ui</artifactId>
+        <groupId>org.jboss.seam.examples</groupId>
+        <version>2.2.3</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+    
+    <groupId>org.jboss.seam.examples</groupId>
+    <artifactId>ui-web</artifactId>
+    <packaging>war</packaging>
+    <name>UI Web Module</name>
+    
+    <properties>
+        <!-- filtering property for components.xml -->
+        <jndiPattern>seam-ui/#{ejbName}/local</jndiPattern>
+    </properties>
+    
+    <dependencies>
+        <dependency>
+            <groupId>org.jboss.seam.examples</groupId>
+            <artifactId>ui-ejb</artifactId>
+            <type>ejb</type>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.seam</groupId>
+            <artifactId>jboss-seam</artifactId>
+            <type>ejb</type>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.seam</groupId>
+            <artifactId>jboss-seam-ui</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.jboss.seam</groupId>
+                    <artifactId>jboss-seam-jul</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+			    <groupId>org.jboss.seam</groupId>
+			    <artifactId>jboss-seam-debug</artifactId>
+			    <version>${project.version}</version>
+			    <scope>runtime</scope>
+			    <exclusions>
+				    <exclusion>
+					    <groupId>org.jboss.seam</groupId>
+					    <artifactId>jboss-seam-core</artifactId>
+				    </exclusion>
+			    </exclusions>
+		    </dependency>
+		
+		    <dependency>
+			    <groupId>com.sun.facelets</groupId>
+			    <artifactId>jsf-facelets</artifactId>
+			    <scope>runtime</scope>
+		    </dependency>
+		
+		    <dependency>
+			    <groupId>javax.faces</groupId>
+			    <artifactId>jsf-api</artifactId>
+			    <scope>provided</scope>
+		    </dependency>
+
+		    <dependency>
+			    <groupId>javax.faces</groupId>
+			    <artifactId>jsf-impl</artifactId>
+			    <scope>provided</scope>
+		    </dependency>
+    </dependencies>
+  
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <configuration>
+                    <webResources>
+                        <resource>
+                            <directory>src/main/webapp</directory>
+                            <filtering>true</filtering>
+                        </resource>
+                    </webResources>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+  
+    <profiles>
+        <profile>
+            <id>tomcat</id>
+            <properties>
+                <!-- filtering property for components.xml -->
+                <jndiPattern>#{ejbName}/local</jndiPattern>
+            </properties>
+            <dependencies>
+                <dependency>
+                    <groupId>org.jboss.seam.examples</groupId>
+                    <artifactId>ui-ejb</artifactId>
+                    <type>ejb</type>
+                    <scope>compile</scope>
+                </dependency>
+                <dependency>
+                    <groupId>javax.faces</groupId>
+                    <artifactId>jsf-api</artifactId>
+                    <scope>compile</scope>
+                </dependency>
+                <dependency>
+                    <groupId>javax.faces</groupId>
+                    <artifactId>jsf-impl</artifactId>
+                    <scope>compile</scope>
+                </dependency>
+                <dependency>
+                    <groupId>org.jboss.seam</groupId>
+                    <artifactId>jboss-seam</artifactId>
+                    <type>ejb</type>
+                    <scope>compile</scope>
+                    <exclusions>
+                        <exclusion>
+                            <groupId>com.thoughtworks.xstream</groupId>
+                            <artifactId>xstream</artifactId>
+                        </exclusion>
+                        <exclusion>
+                            <groupId>xpp3</groupId>
+                            <artifactId>xpp3_min</artifactId>
+                        </exclusion>
+                    </exclusions>
+                </dependency>
+            </dependencies>
+            <build>
+                <finalName>jboss-seam-ui</finalName>
+            </build>
+        </profile>
+    </profiles>
+</project>

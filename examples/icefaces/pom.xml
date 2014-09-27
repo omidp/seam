@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <parent>
+        <artifactId>examples</artifactId>
+        <groupId>org.jboss.seam</groupId>
+        <version>2.2.3</version>
+    </parent>
+    
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>org.jboss.seam.examples</groupId>
+    <artifactId>icefaces</artifactId>
+    <packaging>pom</packaging>
+    <name>Icefaces Example</name>
+  
+    <modules>
+        <module>icefaces-ejb</module>
+        <module>icefaces-web</module>
+        <module>icefaces-ear</module>
+        <module>icefaces-tests</module>
+    </modules>
+    
+    <properties>
+        <example.name>icefaces</example.name>
+    </properties>
+    
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.jboss.seam.examples</groupId>
+                <artifactId>icefaces-ejb</artifactId>
+                <version>${project.version}</version>
+                <type>ejb</type>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.seam.examples</groupId>
+                <artifactId>icefaces-web</artifactId>
+                <version>${project.version}</version>
+                <type>war</type>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.seam.examples</groupId>
+                <artifactId>icefaces-ear</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+    
+</project>

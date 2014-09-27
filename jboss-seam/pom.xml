@@ -1,0 +1,522 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>org.jboss.seam</groupId>
+		<artifactId>jboss-seam-parent</artifactId>
+		<version>2.2.3</version>
+		<relativePath>../jboss-seam-parent/pom.xml</relativePath>
+	</parent>
+	<groupId>org.jboss.seam</groupId>
+	<artifactId>jboss-seam</artifactId>
+	<packaging>ejb</packaging>
+	<name>Seam Core</name>
+	<description>Seam core module for Seam framework</description>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>antlr-maven-plugin</artifactId>
+				<version>2.2</version>
+				<configuration>
+					<grammars>org/jboss/seam/text/seam-text.g</grammars>
+				</configuration>
+				<executions>
+					<execution>
+						<id>antlr-generation</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+             <plugin>
+                 <artifactId>maven-javadoc-plugin</artifactId>
+                 <version>2.7</version>
+                 <configuration>
+                     <links>
+                         <link>http://java.sun.com/j2se/5.0/docs/api</link>
+                     </links>
+                     <keywords>true</keywords>
+                     <author>true</author>
+                     <stylesheetfile>jdstyle.css</stylesheetfile>
+                     <doctitle>JBoss Seam ${project.name} API ${project.version}</doctitle> <!-- Used by javadoc:javadoc goal -->
+                     <detectOfflineLinks>false</detectOfflineLinks>
+                 </configuration>
+                 <executions>
+                      <execution>
+                          <id>attach-javadocs</id>
+                          <phase>package</phase>
+                          <goals>
+                              <goal>jar</goal>
+                          </goals>
+                      </execution>
+                  </executions>
+             </plugin>
+             <plugin>
+                 <artifactId>maven-antrun-plugin</artifactId>
+                 <version>1.6</version>
+                  <configuration>
+                     <target>
+	                     <jar destfile="${project.build.directory}/jboss-seam-wls-compatible.jar">
+						    <zipfileset includes="**/*" excludes="org/jboss/seam/async/TimerServiceDispatcher*" src="${project.build.directory}/jboss-seam.jar" />
+						    <manifest>
+								<attribute name="Built-By" value="${user.name}" />
+								<attribute name="Implementation-Vendor" value="${project.organization.name}" />
+								<attribute name="Implementation-Title" value="JBoss Seam Weblogic compatible" />
+								<attribute name="Implementation-Version" value="${project.version}" />
+						    </manifest>
+						  </jar>
+						  <jar destfile="${project.build.directory}/jboss-seam-wls-compatible-sources.jar">
+                            <zipfileset includes="**/*" excludes="org/jboss/seam/async/TimerServiceDispatcher.java" src="${project.build.directory}/jboss-seam-sources.jar" />
+                            <manifest>
+                                <attribute name="Built-By" value="${user.name}" />
+                                <attribute name="Implementation-Vendor" value="${project.organization.name}" />
+                                <attribute name="Implementation-Title" value="JBoss Seam Weblogic compatible" />
+                                <attribute name="Implementation-Version" value="${project.version}" />
+                            </manifest>
+                          </jar>
+                     </target>
+                 </configuration>
+                 <executions>
+                      <execution>
+                          <phase>package</phase>
+                          <goals>
+                              <goal>run</goal>
+                          </goals>
+                      </execution>
+                  </executions>
+             </plugin>
+		</plugins>
+	</build>
+
+	<dependencies>
+
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-core</artifactId>
+			<optional>true</optional>
+		</dependency>
+
+		<!-- Maven's "nearest" dependency resolution doesn't take into account 
+			parent dependency management! -->
+		<dependency>
+			<groupId>commons-logging</groupId>
+			<artifactId>commons-logging</artifactId>
+			<optional>true</optional>
+		</dependency>
+		
+        <dependency>
+            <groupId>commons-collections</groupId>
+            <artifactId>commons-collections</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-annotations</artifactId>
+			<optional>true</optional>
+		</dependency>
+
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-validator</artifactId>
+			<optional>true</optional>
+		</dependency>
+
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-search</artifactId>
+			<optional>true</optional>
+		</dependency>
+
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-entitymanager</artifactId>
+			<optional>true</optional>
+		</dependency>
+
+		<dependency>
+			<groupId>javassist</groupId>
+			<artifactId>javassist</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>dom4j</groupId>
+			<artifactId>dom4j</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>javax.portlet</groupId>
+			<artifactId>portlet-api</artifactId>
+			<optional>true</optional>
+		</dependency>
+
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>servlet-api</artifactId>
+			<optional>true</optional>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>javax.mail</groupId>
+			<artifactId>mail</artifactId>
+			<optional>true</optional>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>javax.xml.ws</groupId>
+			<artifactId>jaxws-api</artifactId>
+			<optional>true</optional>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>javax.jws</groupId>
+			<artifactId>jsr181-api</artifactId>
+			<scope>provided</scope>
+			<optional>true</optional>
+		</dependency>
+
+		<dependency>
+			<groupId>javax.faces</groupId>
+			<artifactId>jsf-api</artifactId>
+			<optional>true</optional>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>javax.servlet.jsp</groupId>
+			<artifactId>jsp-api</artifactId>
+			<optional>true</optional>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>javax.ejb</groupId>
+			<artifactId>ejb-api</artifactId>
+			<optional>true</optional>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>javax.xml.soap</groupId>
+			<artifactId>saaj-api</artifactId>
+			<optional>true</optional>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>javax.jms</groupId>
+			<artifactId>jms</artifactId>
+			<optional>true</optional>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>javax.annotation</groupId>
+			<artifactId>jsr250-api</artifactId>
+			<optional>true</optional>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>javax.transaction</groupId>
+			<artifactId>jta</artifactId>
+			<optional>true</optional>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.codehaus.groovy</groupId>
+			<artifactId>groovy-all</artifactId>
+			<optional>true</optional>
+		</dependency>
+
+		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+			<optional>true</optional>
+		</dependency>
+
+		<dependency>
+			<groupId>javax.el</groupId>
+			<artifactId>el-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>javax.persistence</groupId>
+			<artifactId>persistence-api</artifactId>
+			<optional>true</optional>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>antlr</groupId>
+			<artifactId>antlr</artifactId>
+			<optional>true</optional>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.ant</groupId>
+			<artifactId>ant-antlr</artifactId>
+			<optional>true</optional>
+		</dependency>
+
+		<dependency>
+			<groupId>net.sf.ehcache</groupId>
+			<artifactId>ehcache</artifactId>
+			<optional>true</optional>
+		</dependency>
+
+		<!-- Order matters of jboss:jboss-cache and org.jboss.cache:jbosscache-core -->
+
+		<dependency>
+			<groupId>jboss</groupId>
+			<artifactId>jboss-cache</artifactId>
+			<optional>true</optional>
+		</dependency>
+
+		<dependency>
+			<groupId>org.jboss.cache</groupId>
+			<artifactId>jbosscache-core</artifactId>
+			<optional>true</optional>
+		</dependency>
+
+
+
+		<!-- This is actually a dep of jboss-cache, but it doesn't declare it -->
+		<dependency>
+			<groupId>jboss</groupId>
+			<artifactId>jboss-system</artifactId>
+			<optional>true</optional>
+		</dependency>
+
+		<!-- This is actually a dep of jboss-cache, but it doesn't declare it -->
+		<dependency>
+			<groupId>jboss</groupId>
+			<artifactId>jboss-jmx</artifactId>
+			<optional>true</optional>
+		</dependency>
+
+		<!-- This is actually a dep of jboss-cache, but it doesn't declare it -->
+		<dependency>
+			<groupId>jgroups</groupId>
+			<artifactId>jgroups</artifactId>
+			<optional>true</optional>
+		</dependency>
+
+		<dependency>
+			<groupId>org.buni.meldware</groupId>
+			<artifactId>meldware-mailjmx</artifactId>
+			<optional>true</optional>
+		</dependency>
+
+		<dependency>
+			<groupId>org.buni.meldware</groupId>
+			<artifactId>meldware-mailapi</artifactId>
+			<optional>true</optional>
+		</dependency>
+
+		<dependency>
+			<groupId>org.drools</groupId>
+			<artifactId>drools-core</artifactId>
+			<optional>true</optional>
+		</dependency>
+
+		<dependency>
+			<groupId>org.drools</groupId>
+			<artifactId>drools-compiler</artifactId>
+			<optional>true</optional>
+		</dependency>
+
+		<dependency>
+			<groupId>org.drools</groupId>
+			<artifactId>drools-templates</artifactId>
+			<optional>true</optional>
+		</dependency>
+
+
+		<dependency>
+			<groupId>org.drools</groupId>
+			<artifactId>drools-decisiontables</artifactId>
+			<optional>true</optional>
+			<exclusions>
+				<exclusion>
+					<groupId>jexcelapi</groupId>
+					<artifactId>jxl</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
+		<dependency>
+			<groupId>com.thoughtworks.xstream</groupId>
+			<artifactId>xstream</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>xpp3</groupId>
+			<artifactId>xpp3_min</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>net.sourceforge.jexcelapi</groupId>
+			<artifactId>jxl</artifactId>
+			<optional>true</optional>
+		</dependency>
+
+		<dependency>
+			<groupId>org.testng</groupId>
+			<artifactId>testng</artifactId>
+			<classifier>jdk15</classifier>
+		</dependency>
+
+		<dependency>
+			<groupId>org.dbunit</groupId>
+			<artifactId>dbunit</artifactId>
+			<optional>true</optional>
+		</dependency>
+
+		<dependency>
+			<groupId>org.jbpm</groupId>
+			<artifactId>jbpm-jpdl</artifactId>
+			<optional>true</optional>
+		</dependency>
+
+		<dependency>
+			<groupId>org.beanshell</groupId>
+			<artifactId>bsh</artifactId>
+			<optional>true</optional>
+		</dependency>
+
+		<dependency>
+			<groupId>org.jboss.el</groupId>
+			<artifactId>jboss-el</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.jboss.seam.embedded</groupId>
+			<artifactId>jboss-embedded-api</artifactId>
+			<optional>true</optional>
+		</dependency>
+
+		<dependency>
+			<groupId>quartz</groupId>
+			<artifactId>quartz</artifactId>
+			<optional>true</optional>
+		</dependency>
+
+		<dependency>
+			<groupId>javax.faces</groupId>
+			<artifactId>jsf-impl</artifactId>
+			<optional>true</optional>
+		</dependency>
+
+		<dependency>
+			<groupId>org.tuckey</groupId>
+			<artifactId>urlrewritefilter</artifactId>
+			<optional>true</optional>
+			<scope>runtime</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>oswego-concurrent</groupId>
+			<artifactId>concurrent</artifactId>
+			<optional>true</optional>
+		</dependency>
+
+		<dependency>
+			<groupId>hsqldb</groupId>
+			<artifactId>hsqldb</artifactId>
+			<optional>true</optional>
+		</dependency>
+
+		<dependency>
+			<groupId>org.jboss</groupId>
+			<artifactId>jboss-vfs</artifactId>
+			<optional>true</optional>
+		</dependency>
+
+		<dependency>
+			<groupId>jboss</groupId>
+			<artifactId>jboss-common-core</artifactId>
+			<optional>true</optional>
+		</dependency>
+
+        <dependency>
+                <groupId>org.openid4java</groupId>
+                <artifactId>openid4java-consumer</artifactId>
+                <type>pom</type>
+                <optional>true</optional>
+            </dependency>
+
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
+			<version>1.4.2</version>
+			<type>jar</type>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+
+    <profiles>
+        <profile>
+            <id>code-coverage</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>emma-maven-plugin</artifactId>
+                    </plugin>
+                    <plugin>
+                      <groupId>org.apache.maven.plugins</groupId>
+                      <artifactId>maven-antrun-plugin</artifactId>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.sonatype.maven.plugin</groupId>
+                        <artifactId>emma4it-maven-plugin</artifactId>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>distribution</id>
+            <build>
+            <plugins>
+	             <plugin>
+		             <artifactId>maven-dependency-plugin</artifactId>
+		             <executions>
+		                    <execution>
+		                        <id>copy-dependencies</id>
+		                        <goals>
+		                            <goal>copy-dependencies</goal>
+		                        </goals>
+		                        <phase>package</phase>
+								<configuration>
+									<excludeGroupIds>org.jboss.seam</excludeGroupIds>
+									<excludeClassifiers>sources, project, distribution</excludeClassifiers>
+									<outputDirectory>../jar-dependencies</outputDirectory>
+									<stripVersion>true</stripVersion>
+									<type>jar</type>
+									<transitive>true</transitive>
+								</configuration>
+		                    </execution>
+		             </executions>
+	            </plugin>
+            </plugins>
+            </build>
+        </profile>
+    </profiles>
+</project>

@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ivy-module version="1.0" xmlns:m="http://ant.apache.org/ivy/maven">
+	<info organisation="@projectName@" module="@projectName@"/>
+	<configurations defaultconfmapping="default->default;sources->sources;test->default">
+		<conf name="sources" transitive="false" visibility="private"/>
+		<conf name="test" transitive="false" visibility="private"/>
+		<conf name="default" transitive="false"/>
+	</configurations>
+	<dependencies defaultconf="default">
+		<!-- Add your JDBC driver dependency here if you need it -->
+		<!--
+		<dependency org="hsqldb" name="hsqldb" rev="1.8.0.8-brew" conf="default"/>
+		-->
+		<dependency org="commons-beanutils" name="commons-beanutils" rev="1.7.0" conf="default,sources"/>
+		<dependency org="commons-digester" name="commons-digester" rev="1.7" conf="default,sources"/>
+		<dependency org="janino" name="janino" rev="2.5.10" conf="default"/>
+		<dependency org="javax.ejb" name="ejb-api" rev="3.0" conf="default"/>
+		<dependency org="javax.el" name="el-api" rev="1.0" conf="default"/>
+		<dependency org="javax.faces" name="jsf-api" rev="${jsf.version}" conf="default,sources"/>
+		<dependency org="javax.faces" name="jsf-impl" rev="${jsf.version}" conf="default,sources"/>
+		<dependency org="javax.persistence" name="persistence-api" rev="1.0" conf="default"/>
+		<dependency org="javax.servlet" name="servlet-api" rev="2.5" conf="default"/>
+		<dependency org="javax.transaction" name="jta" rev="1.1" conf="default"/>
+		<dependency org="net.sourceforge.jexcelapi" name="jxl" rev="2.6.8-seam" conf="default"/>
+		<dependency org="org.antlr" name="antlr-runtime" rev="3.0" conf="default"/>
+		<dependency org="org.drools" name="drools-api" rev="5.0.1" conf="default"/>
+		<dependency org="org.drools" name="drools-compiler" rev="5.0.1" conf="default"/>
+		<dependency org="org.drools" name="drools-core" rev="5.0.1" conf="default"/>
+		<dependency org="org.drools" name="drools-decisiontables" rev="5.0.1" conf="default"/>
+		<dependency org="org.drools" name="drools-templates" rev="5.0.1" conf="default"/>
+		<dependency org="xstream" name="xstream" rev="1.1.3" conf="default"/>
+		<dependency org="xpp3" name="xpp3_min" rev="1.1.3.4.O" conf="default"/>
+		<dependency org="org.eclipse.jdt" name="core" rev="3.2.3.v_686_R32x" conf="default"/>
+		<dependency org="org.codehaus.groovy" name="groovy-all" rev="1.5.4" conf="default"/>
+		<dependency org="org.hibernate" name="hibernate-validator" rev="3.1.0.GA" conf="default"/>
+		<dependency org="org.jboss.el" name="jboss-el" rev="1.0_02.CR5" conf="default"/>
+		<!-- Seam jar is a special case because it's an EJB type and Ivy (at least right now)
+		believes the extension should be ejb, so we have to tell it the correct one. -->
+		<dependency org="org.jboss.seam" name="jboss-seam" rev="${seam.version}" conf="default,sources">
+			<artifact name="jboss-seam" type="jar" ext="jar"/>
+			<artifact name="jboss-seam" type="source" ext="jar" m:classifier="sources"/>
+		</dependency>
+		<dependency org="org.jboss.seam" name="jboss-seam-debug" rev="${seam.version}" conf="default,sources"/>
+		<dependency org="org.jboss.seam" name="jboss-seam-excel" rev="${seam.version}" conf="default,sources"/>
+		<dependency org="org.jboss.seam" name="jboss-seam-ioc" rev="${seam.version}" conf="default,sources"/>
+		<dependency org="org.jboss.seam" name="jboss-seam-jul" rev="${seam.version}" conf="default,sources"/>
+		<dependency org="org.jboss.seam" name="jboss-seam-mail" rev="${seam.version}" conf="default,sources"/>
+		<dependency org="org.jboss.seam" name="jboss-seam-pdf" rev="${seam.version}" conf="default,sources"/>
+		<dependency org="org.jboss.seam" name="jboss-seam-remoting" rev="${seam.version}" conf="default,sources"/>
+		<dependency org="org.jboss.seam" name="jboss-seam-rss" rev="${seam.version}" conf="default,sources"/>
+		<dependency org="org.jboss.seam" name="jboss-seam-ui" rev="${seam.version}" conf="default,sources"/>
+		<dependency org="org.jbpm" name="jbpm-jpdl" rev="3.2.2" conf="default"/>
+		<dependency org="org.mvel" name="mvel2" rev="2.0.10" conf="default"/>
+		<!-- [if richfaces] ->
+		<dependency org="com.sun.facelets" name="jsf-facelets" rev="1.1.15.B1" conf="default,sources"/>
+		<dependency org="org.richfaces.framework" name="richfaces-api" rev="${richfaces.version}" conf="default,sources"/>
+		<dependency org="org.richfaces.framework" name="richfaces-impl" rev="${richfaces.version}" conf="default,sources"/>
+		<dependency org="org.richfaces.ui" name="richfaces-ui" rev="${richfaces.version}" conf="default,sources"/>
+		<dependency org="org.richfaces.samples" name="glassX" rev="${richfaces.version}" conf="default"/>
+		<dependency org="org.richfaces.samples" name="darkX" rev="${richfaces.version}" conf="default"/>
+		<dependency org="org.richfaces.samples" name="laguna" rev="${richfaces.version}" conf="default"/>
+		<!- [/endif richfaces] -->
+		<!-- [if icefaces] ->
+		<dependency org="org.icefaces" name="icefaces" rev="${icefaces.version}" conf="default"/>
+		<dependency org="org.icefaces" name="icefaces-comps" rev="${icefaces.version}" conf="default"/>
+		<dependency org="org.icefaces" name="icefaces-facelets" rev="${icefaces.version}" conf="default"/>
+		<dependency org="backport-util-concurrent" name="backport-util-concurrent" rev="2.2" conf="default"/>
+		<dependency org="commons-digester" name="commons-digester" rev="1.8" conf="default"/>
+		<dependency org="commons-fileupload" name="commons-fileupload" rev="1.2.1" conf="default"/>
+		<!- [/endif icefaces] -->
+		<dependency org="org.testng" name="testng" rev="5.9" conf="test"/>
+		<dependency org="org.jboss.seam.embedded" name="hibernate-all" rev="${jboss-embedded.version}" conf="test"/>
+		<dependency org="org.jboss.seam.embedded" name="thirdparty-all" rev="${jboss-embedded.version}" conf="test"/>
+		<dependency org="org.jboss.seam.embedded" name="jboss-embedded-all" rev="${jboss-embedded.version}" conf="test"/>
+		<dependency org="org.jboss.seam.embedded" name="jboss-embedded-api" rev="${jboss-embedded.version}" conf="test"/>
+	</dependencies>
+</ivy-module>

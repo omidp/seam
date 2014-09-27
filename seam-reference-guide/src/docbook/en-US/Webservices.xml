@@ -1,0 +1,914 @@
+<chapter id="webservices">
+  <title>Web Services</title>
+
+  <para>
+    Seam integrates with JBossWS to allow standard JEE web services to take full advantage of Seam's contextual framework,
+    including support for conversational web services. This chapter walks through the steps required to allow web 
+    services to run within a Seam environment.
+  </para>
+
+  <sect1>
+    <title>Configuration and Packaging</title>
+    <para>
+      To allow Seam to intercept web service requests so that the necessary Seam contexts can be created for the request, 
+      a special SOAP handler must be configured; <literal>org.jboss.seam.webservice.SOAPRequestHandler</literal>
+      is a <literal>SOAPHandler</literal> implementation that does the work of managing Seam's lifecycle during the scope
+      of a web service request.  
+    </para>
+    
+    <para>
+      A special configuration file, <literal>standard-jaxws-endpoint-config.xml</literal> should be placed 
+      into the <literal>META-INF</literal> directory of the <literal>jar</literal> file that contains the 
+      web service classes.  This file contains the following SOAP handler configuration:
+    </para>
+    
+    <programlisting role="XML"><![CDATA[<jaxws-config xmlns="urn:jboss:jaxws-config:2.0" 
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+              xmlns:javaee="http://java.sun.com/xml/ns/javaee"
+              xsi:schemaLocation="urn:jboss:jaxws-config:2.0 jaxws-config_2_0.xsd">
+   <endpoint-config>
+      <config-name>Seam WebService Endpoint</config-name>
+      <pre-handler-chains>
+         <javaee:handler-chain>
+            <javaee:protocol-bindings>##SOAP11_HTTP</javaee:protocol-bindings>
+            <javaee:handler>
+               <javaee:handler-name>SOAP Request Handler</javaee:handler-name>
+               <javaee:handler-class>org.jboss.seam.webservice.SOAPRequestHandler</javaee:handler-class>
+            </javaee:handler>
+         </javaee:handler-chain>
+      </pre-handler-chains>
+   </endpoint-config>
+</jaxws-config>]]></programlisting>
+
+  </sect1>
+  
+  <sect1>
+    <title>Conversational Web Services</title>
+    <para>
+      So how are conversations propagated between web service requests?  Seam uses a SOAP header element present
+      in both the SOAP request and response messages to carry the conversation ID from the consumer to the service,
+      and back again.  Here's an example of a web service request that contains a conversation ID:
+    </para>
+    
+    <programlisting role="XML"><![CDATA[<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" 
+    xmlns:seam="http://seambay.example.seam.jboss.org/">
+  <soapenv:Header>
+    <seam:conversationId xmlns:seam='http://www.jboss.org/seam/webservice'>2</seam:conversationId>
+  </soapenv:Header>
+  <soapenv:Body>
+    <seam:confirmAuction/>
+  </soapenv:Body>
+</soapenv:Envelope>    
+    ]]></programlisting>
+    
+    <para>
+      As you can see in the above SOAP message, there is a <literal>conversationId</literal> element within the
+      SOAP header that contains the conversation ID for the request, in this case <literal>2</literal>.  
+      Unfortunately, because web services may be consumed by a variety of web service clients written in a 
+      variety of languages, it is up to the developer to implement conversation ID propagation between individual 
+      web services that are intended to be used within the scope of a single conversation.
+    </para>
+    
+    <para>
+      An important thing to note is that the <literal>conversationId</literal> header element must be qualified
+      with a namespace of <literal>http://www.jboss.org/seam/webservice</literal>, otherwise Seam will not be
+      able to read the conversation ID from the request. Here's an example of a response to the above request message:
+    </para>
+    
+    <programlisting role="XML"><![CDATA[<env:Envelope xmlns:env='http://schemas.xmlsoap.org/soap/envelope/'>
+  <env:Header>
+    <seam:conversationId xmlns:seam='http://www.jboss.org/seam/webservice'>2</seam:conversationId>
+  </env:Header>
+  <env:Body>
+    <confirmAuctionResponse xmlns="http://seambay.example.seam.jboss.org/"/>
+  </env:Body>
+</env:Envelope>    
+    ]]></programlisting>
+    
+    <para>
+      As you can see, the response message contains the same <literal>conversationId</literal> element as the request.
+    </para>
+    
+    <sect2>
+      <title>A Recommended Strategy</title>
+      
+      <para>
+        As web services must be implemented as either a stateless session bean or POJO, it is recommended that for
+        conversational web services, the web service acts as a facade to a conversational Seam component.
+      </para>
+      
+      <mediaobject>
+        <imageobject role="fo">
+          <imagedata fileref="images/ws-strategy.png" align="center" scalefit="1"/>
+        </imageobject>
+        <imageobject role="html">
+          <imagedata fileref="images/ws-strategy.png" align="center"/>
+        </imageobject>
+      </mediaobject>      
+      
+      <para>
+        If the web service is written as a stateless session bean, then it is also possible to make it a Seam
+        component by giving it a <literal>@Name</literal>.  Doing this allows Seam's bijection (and other) 
+        features to be used in the web service class itself. 
+      </para>
+      
+    </sect2>
+    
+  </sect1>
+  
+  <sect1>
+    <title>An example web service</title>
+
+    <para>
+      Let's walk through an example web service.  The code in this section all comes from the seamBay example
+      application in Seam's <literal>/examples</literal> directory, and follows the recommended strategy as
+      described in the previous section.  Let's first take a look at the web service class and one of its web
+      service methods:
+    </para>
+
+    <programlisting role="JAVA"><![CDATA[@Stateless
+@WebService(name = "AuctionService", serviceName = "AuctionService")
+public class AuctionService implements AuctionServiceRemote
+{
+   @WebMethod
+   public boolean login(String username, String password)
+   {
+      Identity.instance().setUsername(username);
+      Identity.instance().setPassword(password);
+      Identity.instance().login();
+      return Identity.instance().isLoggedIn();
+   }
+
+   // snip
+}]]></programlisting>
+
+    <para>
+      As you can see, our web service is a stateless session bean, and is annotated using the JWS annotations 
+      from the <literal>javax.jws</literal> package, as defined by JSR-181.  The <literal>@WebService</literal> 
+      annotation tells the container that this class implements a web service, and the <literal>@WebMethod</literal> 
+      annotation on the <literal>login()</literal> method identifies the method as a web service method.  
+      The <literal>name</literal> and <literal>serviceName</literal> attributes in the <literal>@WebService</literal> 
+      annotation are optional.
+    </para>
+    
+    <para>
+      As is required by the specification, each method that is to be exposed as a web service method must also be 
+      declared in the remote interface of the web service class (when the web service is a stateless session bean).  
+      In the above example, the <literal>AuctionServiceRemote</literal> interface must declare the <literal>login()</literal> 
+      method as it is annotated as a <literal>@WebMethod</literal>.
+    </para>    
+    
+    <para>
+      As you can see in the above code, the web service implements a <literal>login()</literal> method that 
+      delegates to Seam's built-in <literal>Identity</literal> component.  In keeping with our recommended strategy,
+      the web service is written as a simple facade, passing off the real work to a Seam component.  This allows
+      for the greatest reuse of business logic between web services and other clients.
+    </para>
+    
+    <para>
+      Let's look at another example.  This web service method begins a new conversation by delegating to the
+      <literal>AuctionAction.createAuction()</literal> method:
+    </para>
+    
+    <programlisting role="JAVA"><![CDATA[   @WebMethod
+   public void createAuction(String title, String description, int categoryId)
+   {
+      AuctionAction action = (AuctionAction) Component.getInstance(AuctionAction.class, true);
+      action.createAuction();
+      action.setDetails(title, description, categoryId);
+   }]]></programlisting>
+   
+    <para>
+      And here's the code from <literal>AuctionAction</literal>:
+    </para>
+    
+    <programlisting role="JAVA"><![CDATA[   @Begin
+   public void createAuction()
+   {
+      auction = new Auction();
+      auction.setAccount(authenticatedAccount);
+      auction.setStatus(Auction.STATUS_UNLISTED);        
+      durationDays = DEFAULT_AUCTION_DURATION;
+   }]]></programlisting>
+   
+    <para>
+      From this we can see how web services can participate in long running conversations, by acting as a facade
+      and delegating the real work to a conversational Seam component.
+    </para>
+
+  </sect1>
+
+   <sect1>
+     <title>RESTful HTTP webservices with RESTEasy</title>
+
+     <para>
+        Seam integrates the RESTEasy implementation of the JAX-RS specification (JSR 311). You can decide how
+        "deep" the integration into your Seam application is going to be:
+     </para>
+
+      <itemizedlist>
+         <listitem>
+            <para>
+               Seamless integration of RESTEasy bootstrap and configuration, automatic detection of resources
+               and providers.
+            </para>
+         </listitem>
+         <listitem>
+            <para>
+               Serving HTTP/REST requests with the SeamResourceServlet, no external servlet or configuration in
+               web.xml required.
+            </para>
+         </listitem>
+         <listitem>
+            <para>
+               Writing resources as Seam components, with full Seam lifecycle management and interception (bijection).
+            </para>
+         </listitem>
+      </itemizedlist>
+
+      <sect2>
+         <title>RESTEasy configuration and request serving</title>
+
+         <para>
+            First, get the RESTEasy libraries and the <literal>jaxrs-api.jar</literal>, deploy them with the
+            other libraries of your application. Also deploy the integration library,
+            <literal>jboss-seam-resteasy.jar</literal>. 
+         </para>
+         <para>
+	         In seam-gen based projects, this can be done by appending <literal>jaxrs-api.jar</literal>, <literal>resteasy-jaxrs.jar</literal>
+	         and <literal>jboss-seam-resteasy.jar</literal> to the <literal>deployed-jars.list</literal> (war deployment) or 
+	         <literal>deployed-jars-ear.list</literal> (ear deployment) file. For a JBoss Tools based project, copy the libraries mentioned 
+	         above to the <literal>EarContent/lib</literal> (ear deployment) or <literal>WebContent/WEB-INF/lib</literal> (war deployment) 
+	         folder and reload the project in the IDE.
+         </para>
+         
+         <para>
+            On startup, all classes annotated <literal>@javax.ws.rs.Path</literal> will be discovered automatically
+            and registered as HTTP resources. Seam automatically accepts and serves HTTP requests with its built-in
+            <literal>SeamResourceServlet</literal>. The URI of a resource is build as follows:
+         </para>
+
+         <itemizedlist>
+             <listitem>
+                <para>
+                   The URI starts with the host and context path of your application,
+                    e.g. <literal>http://your.hostname/myapp</literal>.
+                </para>
+             </listitem>
+            <listitem>
+               <para>
+                  Then the pattern mapped in <literal>web.xml</literal> for the <literal>SeamResourceServlet</literal>,
+                   e.g <literal>/seam/resource</literal> if you follow the common examples, is appended.
+                  Change this setting to expose your RESTful resources under a different base.
+                  Note that this is a global change and other Seam resources (e.g. <literal>s:graphicImage</literal> and <literal>s:captcha</literal>)
+                  are then also served under that base path.
+               </para>
+            </listitem>
+            <listitem>
+               <para>
+                  The RESTEasy integration for Seam then appends a configurable string to the base path, by default
+                  this is <literal>/rest</literal>. Hence, the full base path of your resources would e.g. be
+                  <literal>/myapp/seam/resource/rest</literal>. We recommend that you change this string in your application (details below).
+                  You could for example add a version number to prepare for a future REST API upgrade of your services
+                  (old clients would keep the old URI base): <literal>/myapp/seam/resource/restv1</literal>.
+               </para>
+            </listitem>
+            <listitem>
+               <para>
+                  Finally, the actual resource is available under the defined <literal>@Path</literal>, e.g. a resource
+                  mapped with <literal>@Path("/customer")</literal> would be available under
+                  <literal>/myapp/seam/resource/rest/customer</literal>.
+               </para>
+            </listitem>
+         </itemizedlist>
+
+         <para>
+            As an example, the following resource definition would return a plaintext representation for any
+            GET requests using the URI <literal>http://your.hostname/myapp/seam/resource/rest/customer/123</literal>:
+         </para>
+
+         <programlisting role="JAVA"><![CDATA[@Path("/customer")
+public class MyCustomerResource {
+
+    @GET
+    @Path("/{customerId}")
+    @Produces("text/plain")
+    public String getCustomer(@PathParam("customerId") int id) {
+         return ...;
+    }
+
+}]]></programlisting>
+
+         <para>
+            No additional configuration is required; you do not have to edit <literal>web.xml</literal> or any
+            other setting if these defaults are acceptable. However, you can configure RESTEasy in your Seam application.
+            First import the <literal>resteasy</literal> namespace into your XML configuration (<literal>components.xml</literal>) file header:
+         </para>
+
+         <programlisting role="XML"><![CDATA[<components
+   xmlns="http://jboss.com/products/seam/components"
+   xmlns:resteasy="http://jboss.com/products/seam/resteasy"
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xsi:schemaLocation=
+     http://jboss.com/products/seam/resteasy
+         http://jboss.com/products/seam/resteasy-2.3.xsd
+     http://jboss.com/products/seam/components
+         http://jboss.com/products/seam/components-2.3.xsd">]]></programlisting>
+
+         <para>
+            You can then change the <literal>/rest</literal> prefix as mentioned earlier:
+         </para>
+
+         <programlisting role="XML"><![CDATA[<resteasy:application resource-path-prefix="/restv1"/>]]></programlisting>
+
+         <para>
+            The full base path to your resources is now <literal>/myapp/seam/resource/restv1/{resource}</literal> - note
+            that your <literal>@Path</literal> definitions and mappings do NOT change. This is an application-wide
+            switch usually used for versioning of the HTTP interface.
+         </para>
+
+         <para>
+            Seam will scan your classpath for any deployed <literal>@javax.ws.rs.Path</literal> resources and any
+            <literal>@javax.ws.rs.ext.Provider</literal> classes. You can disable scanning and configure these
+            classes manually:
+         </para>
+         
+         <programlisting role="XML"><![CDATA[<resteasy:application
+     scan-providers="false"
+     scan-resources="false"
+     use-builtin-providers="true">
+
+     <resteasy:resource-class-names>
+         <value>org.foo.MyCustomerResource</value>
+         <value>org.foo.MyOrderResource</value>
+         <value>org.foo.MyStatelessEJBImplementation</value>
+     </resteasy:resource-class-names>
+
+     <resteasy:provider-class-names>
+         <value>org.foo.MyFancyProvider</value>
+     </resteasy:provider-class-names>
+
+ </resteasy:application>]]></programlisting>
+
+         <para>
+            The <literal>use-built-in-providers</literal> switch enables (default) or disables the RESTEasy built-in
+            providers. We recommend you leave them enabled, as they provide plaintext, JSON, and JAXB marshalling
+            out of the box.
+         </para>
+
+         <para>
+            RESTEasy supports plain EJBs (EJBs that are not Seam components) as resources. Instead of configuring the
+            JNDI names in a non-portable fashion in <literal>web.xml</literal> (see RESTEasy documentation), you can
+            simply list the EJB implementation classes, not the business interfaces, in <literal>components.xml</literal>
+            as shown above. Note that you have to annotate the <literal>@Local</literal> interface of the EJB with
+            <literal>@Path</literal>, <literal>@GET</literal>, and so on - not the bean implementation class. This allows
+            you to keep your application deployment-portable with the global Seam <literal>jndi-pattern</literal> switch
+            on <literal>&lt;core:init/&gt;</literal>. Note that plain (non-Seam component) EJB resources will not be found
+            even if scanning of resources is enabled, you always have to list them manually. Again, this whole paragraph
+            is only relevant for EJB resources that are not also Seam components and that do not have
+            an <literal>@Name</literal> annotation.
+         </para>
+
+         <para>
+            Finally, you can configure media type and language URI extensions:
+         </para>
+
+         <programlisting role="XML"><![CDATA[<resteasy:application>
+
+    <resteasy:media-type-mappings>
+       <key>txt</key><value>text/plain</value>
+    </resteasy:media-type-mappings>
+
+    <resteasy:language-mappings>
+       <key>deutsch</key><value>de-DE</value>
+    </resteasy:language-mappings>
+
+</resteasy:application>]]></programlisting>
+
+         <para>
+            This definition would map the URI suffix of <literal>.txt.deutsch</literal> to
+            additional <literal>Accept</literal> and <literal>Accept-Language</literal> header values
+            <literal>text/plain</literal> and <literal>de-DE</literal>.
+         </para>
+
+      </sect2>
+
+      <sect2>
+         <title>Resources as Seam components</title>
+
+         <para>
+            Any resource and provider instances are managed by RESTEasy by default. That means a resource class
+            will be instantiated by RESTEasy and serve a single request, after which it will be destroyed. This is
+            the default JAX-RS lifecycle. Providers are instantiated once for the whole application and are
+            effectively singletons and supposed to be stateless.
+         </para>
+
+         <para>
+            You can write resources as Seam components and benefit from the richer lifecycle management
+            of Seam, and interception for bijection, security, and so on. Simply make your resource class a
+            Seam component:
+         </para>
+
+         <programlisting role="JAVA"><![CDATA[@Name("customerResource")
+@Path("/customer")
+public class MyCustomerResource {
+
+    @In
+    CustomerDAO customerDAO;
+
+    @GET
+    @Path("/{customerId}")
+    @Produces("text/plain")
+    public String getCustomer(@PathParam("customerId") int id) {
+         return customerDAO.find(id).getName();
+    }
+
+}]]></programlisting>
+
+         <para>
+            An instance of <literal>customerResource</literal> is now handled by Seam when a request hits the
+            server. This is a Seam JavaBean component that is <literal>EVENT</literal>-scoped, hence no different
+            than the default JAX-RS lifecycle. You get full Seam injection and interception support, and all other Seam
+            components and contexts are available to you. Currently also supported are <literal>APPLICATION</literal>
+            and <literal>STATELESS</literal> resource Seam components. These three scopes allow you to create an effectively
+            stateless Seam middle-tier HTTP request-processing application.
+         </para>
+
+         <para>
+            You can annotate an interface and keep the implementation free from JAX-RS annotations:
+         </para>
+
+         <programlisting role="JAVA"><![CDATA[@Path("/customer")
+public interface MyCustomerResource {
+
+    @GET
+    @Path("/{customerId}")
+    @Produces("text/plain")
+    public String getCustomer(@PathParam("customerId") int id);
+
+}]]></programlisting>
+
+         <programlisting role="JAVA"><![CDATA[@Name("customerResource")
+@Scope(ScopeType.STATELESS)
+public class MyCustomerResourceBean implements MyCustomerResource {
+
+    @In
+    CustomerDAO customerDAO;
+
+    public String getCustomer(int id) {
+         return customerDAO.find(id).getName();
+    }
+
+}]]></programlisting>
+
+         <para>
+           You can use <literal>SESSION</literal>-scoped Seam components. By default, the session will however be shortened
+           to a single request. In other words, when an HTTP request is being processed by the RESTEasy integration code,
+           an HTTP session will be created so that Seam components can utilize that context. When the request has
+           been processed, Seam will look at the session and decide if the session was created only to serve that
+           single request (no session identifier has been provided with the request, or no session existed for the request).
+           If the session has been created only to serve this request, the session will be destroyed after the request!
+         </para>
+
+         <para>
+           Assuming that your Seam application only uses event, application, or stateless components, this procedure
+           prevents exhaustion of available HTTP sessions on the server. The RESTEasy integration with Seam assumes
+           by default that sessions are not used, hence anemic sessions would add up as every REST request would start
+           a session that will only be removed when timed out.
+         </para>
+
+         <para>
+            If your RESTful Seam application has to preserve session state across REST HTTP requests, disable this
+            behavior in your configuration file:
+         </para>
+
+         <programlisting role="XML"><![CDATA[<resteasy:application destroy-session-after-request="false"/>]]></programlisting>
+
+         <para>
+             Every REST HTTP request will now create a new session that will only be removed by timeout or explicit
+             invalidation in your code through <literal>Session.instance().invalidate()</literal>.
+             It is your responsibility to pass a valid session identifier along with your HTTP requests, if you want
+             to utilize the session context across requests.
+         </para>
+
+         <para>
+            <literal>CONVERSATION</literal>-scoped resource components and mapping of conversations to temporary HTTP
+            resources and paths is planned but currently not supported.
+         </para>
+
+         <para>
+            EJB Seam components are supported as REST resources. Always annotate the local business interface, not
+            the EJB implementation class, with JAX-RS annotations. The EJB has to be <literal>STATELESS</literal>.
+         </para>
+         
+         <para>
+            Sub-resources as defined in the JAX RS specification, section 3.4.1, can also be Seam component instances:
+         </para>
+         
+<programlisting role="JAVA"><![CDATA[@Path("/garage")
+@Name("garage")
+public class GarageService
+{
+   ...
+   
+   @Path("/vehicles")
+   public VehicleService getVehicles() {
+      return (VehicleService) Component.getInstance(VehicleService.class);
+   }
+}]]></programlisting>
+
+         <note>
+            <para>
+                RESTEasy components do not support hot redeployment. As a result, the components should never 
+                be placed in the <literal>src/hot</literal> folder. The <literal>src/main</literal> folder should
+                be used instead.
+            </para>
+         </note>
+         <note>
+            <para>
+                Provider classes can currently not be Seam components. Although you can configure an
+                <literal>@Provider</literal> annotated class as a Seam component, it will at runtime be managed
+                by RESTEasy as a singleton with no Seam interception, bijection, etc. The instance will not be
+                a Seam component instance. We plan to support Seam component lifecycle for JAX-RS providers in
+                the future.
+            </para>
+         </note>
+
+      </sect2>
+
+      <sect2>
+         <title>Securing resources</title>
+
+         <para>
+            You can enable the Seam authentication filter for HTTP Basic and Digest authentication in
+            <literal>components.xml</literal>:
+         </para>
+
+         <programlisting role="XML"><![CDATA[<web:authentication-filter url-pattern="/seam/resource/rest/*" auth-type="basic"/>]]></programlisting>
+
+         <para>
+            See the Seam security chapter on how to write an authentication routine.
+         </para>
+
+         <para>
+            After successful authentication, authorization rules with the common
+            <literal>@Restrict</literal> and <literal>@PermissionCheck</literal> annotations are in effect. You can
+            also access the client <literal>Identity</literal>, work with permission mapping, and so on. All
+            regular Seam security features for authorization are available.
+         </para>
+
+      </sect2>
+
+      <sect2>
+         <title>Mapping exceptions to HTTP responses</title>
+
+         <para>
+            Section 3.3.4 of the JAX-RS specification defines how checked or unchecked exceptions are handled by the
+            JAX RS implementation. In addition to using an exception mapping provider as defined by JAX-RS, the integration
+            of RESTEasy with Seam allows you to map exceptions to HTTP response codes within Seam's <literal>pages.xml</literal>
+            facility. If you are already using <literal>pages.xml</literal> declarations, this is easier to maintain than
+            potentially many JAX RS exception mapper classes.
+         </para>
+
+         <para>
+            Exception handling within Seam requires that the Seam filter is executed for your HTTP request. Ensure that
+            you do filter <emphasis>all</emphasis> requests in your <literal>web.xml</literal>, not - as
+            some Seam examples might show - a request URI pattern that doesn't cover your REST request paths.
+            The following example intercepts <emphasis>all</emphasis> HTTP requests and enables Seam exception handling:
+         </para>
+
+         <programlisting role="XML"><![CDATA[<filter>
+    <filter-name>Seam Filter</filter-name>
+    <filter-class>org.jboss.seam.servlet.SeamFilter</filter-class>
+</filter>
+
+<filter-mapping>
+    <filter-name>Seam Filter</filter-name>
+    <url-pattern>/*</url-pattern>
+</filter-mapping>]]></programlisting>
+
+         <para>
+            To convert the unchecked <literal>UnsupportedOperationException</literal> thrown by your resource
+            methods to a <literal>501 Not Implemented</literal> HTTP status response, add the following to your
+            <literal>pages.xml</literal> descriptor:
+         </para>
+
+         <programlisting role="XML"><![CDATA[<exception class="java.lang.UnsupportedOperationException">
+    <http-error error-code="501">
+        <message>The requested operation is not supported</message>
+    </http-error>
+</exception>]]></programlisting>
+
+         <para>
+            Custom or checked exceptions are handled the same:
+         </para>
+
+         <programlisting role="XML"><![CDATA[<exception class="my.CustomException" log="false">
+    <http-error error-code="503">
+        <message>Service not available: #{org.jboss.seam.handledException.message}</message>
+    </http-error>
+</exception>]]></programlisting>
+
+         <para>
+            You do not have to send an HTTP error to the client if an exception occurs. Seam allows you to map the
+            exception as a redirect to a view of your Seam application. As this feature is typically used for human
+            clients (web browsers) and not for REST API remote clients, you should pay extra attention to conflicting
+            exception mappings in <literal>pages.xml</literal>.
+         </para>
+
+         <para>
+            Note that the HTTP response still passes through the servlet container, so an additional mapping might apply
+            if you have <literal>&lt;error-page&gt;</literal> mappings in your <literal>web.xml</literal> configuration.
+            The HTTP status code would then be mapped to a rendered HTML error page with status <literal>200 OK</literal>!
+         </para>
+
+      </sect2>
+
+      <sect2>
+         <title>Exposing entities via RESTful API</title>
+         
+         <para>
+            Seam makes it really easy to use a RESTful approach for accessing application data. One of the improvements that
+            Seam introduces is the ability to expose parts of your SQL database for remote access via plain HTTP calls.
+            For this purpose, the Seam/RESTEasy integration module provides two components: <literal>ResourceHome</literal> and
+            <literal>ResourceQuery</literal>, which benefit from the API provided by the Seam Application Framework
+            (<xref linkend="framework"/>). These components allow you to bind domain model entity classes to an HTTP API.
+         </para>
+         
+         <sect3>
+         	<title>ResourceQuery</title>
+         	
+         	<para>
+         		ResourceQuery exposes entity querying capabilities as a RESTful web service. By default, a simple
+         		underlying Query component, which returns a list of instances of a given entity class, is created automatically. 
+         		Alternatively, the ResourceQuery component can be attached to an existing Query component in more sophisticated 
+         		cases. The following example demonstrates how easily ResourceQuery can be configured:
+         	</para>
+         	
+         	<programlisting role="XML"><![CDATA[<resteasy:resource-query
+   path="/user"
+   name="userResourceQuery"
+   entity-class="com.example.User"/>]]></programlisting>
+         	
+         	<para>
+         		With this single XML element, a ResourceQuery component is set up. The configuration is straightforward:
+         	</para>
+         		
+         	<itemizedlist>
+         		<listitem>
+	           		<para>
+         	 			The component will return a list of <literal>com.example.User</literal> instances.
+         	 		</para>
+         	 	</listitem>
+           		<listitem>
+	           		<para>
+         	 			The component will handle HTTP requests on the URI path <literal>/user</literal>.
+         	 		</para>
+         	 	</listitem>
+         	 	<listitem>
+         	 		<para>
+         	 			The component will by default transform the data into XML or JSON (based on client's preference).
+         	 			The set of supported mime types can be altered by using the <literal>media-types</literal> attribute,
+                      for example:
+         	 		</para>
+         	 	</listitem>
+         	</itemizedlist>
+         	 
+         	 <programlisting role="XML"><![CDATA[<resteasy:resource-query
+   path="/user"
+   name="userResourceQuery"
+   entity-class="com.example.User"
+   media-types="application/fastinfoset"/>]]></programlisting>
+         	
+         	<para>	
+				Alternatively, if you do not like configuring components using XML, you can set up the component by extension:
+			</para>
+			
+			<programlisting role="JAVA"><![CDATA[@Name("userResourceQuery")
+@Path("user")
+public class UserResourceQuery extends ResourceQuery<User>
+{
+}]]></programlisting>
+
+			<para>
+				Queries are read-only operations, the resource only responds to GET requests. Furthermore, ResourceQuery allows
+            clients  of a web service to manipulate the resultset of a query using the following path parameters:
+			</para>
+			
+			<informaltable>
+				<tgroup cols='3'>
+					<thead>
+						<row>
+  							<entry>Parameter name</entry>
+  							<entry>Example</entry>
+  							<entry>Description</entry>
+						</row>
+					</thead>
+					<tbody>
+	         			<row>
+	         				<entry>start</entry>
+         					<entry>/user?start=20</entry>
+         					<entry>Returns a subset of a database query result starting with the 20th entry.</entry>
+         				</row>
+	         			<row>
+	         				<entry>show</entry>
+         					<entry>/user?show=10</entry>
+         					<entry>Returns a subset of the database query result limited to 10 entries.</entry>
+         				</row>
+         			</tbody>
+         		</tgroup>
+         	</informaltable>
+			
+			<para>
+				For example, you can send an HTTP GET request to <literal>/user?start=30&amp;show=10</literal> to get a list of
+            entries representing 10 rows starting with row 30.
+			</para>
+			
+			<note>
+            	<para>
+                	RESTEasy uses JAXB to marshall entities. Thus, in order to be able to transfer them over the wire, you
+                  need to annotate entity classes with <literal>@XMLRootElement</literal>. Consult the JAXB and
+                  RESTEasy documentation for more information.
+            	</para>
+         	</note>
+         
+         </sect3>
+         
+         <sect3>
+         
+         	<title>ResourceHome</title>
+         	
+         	<para>
+         		Just as ResourceQuery makes Query's API available for remote access, so does ResourceHome for the Home
+               component. The following table describes how the two APIs (HTTP and Home) are bound together.
+         	</para>
+         	
+         	<table>
+				<tgroup cols='4'>
+					<thead>
+						<row>
+  							<entry>HTTP method</entry>
+  							<entry>Path</entry>
+  							<entry>Function</entry>
+  							<entry>ResourceHome method</entry>
+						</row>
+					</thead>
+					<tbody>
+	         			<row>
+	         				<entry>GET</entry>
+         					<entry>{path}/{id}</entry>
+         					<entry>Read</entry>
+         					<entry>getResource()</entry>
+         				</row>
+	         			<row>
+	         				<entry>POST</entry>
+         					<entry>{path}</entry>
+         					<entry>Create</entry>
+         					<entry>postResource()</entry>
+         				</row>
+	         			<row>
+	         				<entry>PUT</entry>
+         					<entry>{path}/{id}</entry>
+         					<entry>Update</entry>
+         					<entry>putResource()</entry>
+         				</row>
+	         			<row>
+	         				<entry>DELETE</entry>
+         					<entry>{path}/{id}</entry>
+         					<entry>Delete</entry>
+         					<entry>deleteResource()</entry>
+         				</row>
+         			</tbody>
+         		</tgroup>
+         	</table>
+         	
+       		<itemizedlist>
+           		<listitem>
+              		<para>
+               			You can GET, PUT, and DELETE a particular user instance by sending HTTP requests to /user/{userId}
+               		</para>
+               	</listitem>
+               	<listitem>
+               		<para>
+               			Sending a POST request to <literal>/user</literal> creates a new user entity instance and persists it.
+                        Usually, you leave it up to the persistence layer to provide the entity instance with an identifier
+                        value and thus an URI. Therefore, the URI is sent back to the client in the
+                        <literal>Location</literal> header of the HTTP response.
+               		</para>
+               	</listitem>
+            </itemizedlist>
+         	
+         	<para>
+         		The configuration of ResourceHome is very similar to ResourceQuery except that you need to explicitly specify the underlying 
+         		Home component and the Java type of the entity identifier property.
+         	</para>
+         	
+         	<programlisting role="XML"><![CDATA[<resteasy:resource-home
+   path="/user"
+   name="userResourceHome"
+   entity-home="#{userHome}"
+   entity-id-class="java.lang.Integer"/>]]></programlisting>
+         	
+         	<para>Again, you can write a subclass of ResourceHome instead of XML:</para>
+         	
+         	<programlisting role="JAVA"><![CDATA[@Name("userResourceHome")
+@Path("user")
+public class UserResourceHome extends ResourceHome<User, Integer>
+{
+
+   @In
+   private EntityHome<User> userHome;
+
+   @Override
+   public Home<?, User> getEntityHome()
+   {
+      return userHome;
+   }
+}]]></programlisting>
+
+			<para>
+				For more examples of ResourceHome and ResourceQuery components, take a look at the <emphasis>Seam Tasks</emphasis> 
+            example application, which demonstrates how Seam/RESTEasy integration can be used together with a jQuery web client.
+            In addition, you can find more code example in the <emphasis>Restbay</emphasis> example, which is used mainly
+            for testing purposes.
+			</para>
+         	
+         </sect3>
+               
+      </sect2>
+
+      <sect2>
+         <title>Testing resources and providers</title>
+         
+         <para>
+            Seam includes a unit testing utility class that helps you create unit tests for a RESTful
+            architecture. Extend the <literal>SeamTest</literal> class as usual and use the
+            <literal>ResourceRequestEnvironment.ResourceRequest</literal> to emulate HTTP requests/response cycles:
+         </para>
+      
+         <programlisting role="JAVA"><![CDATA[import org.jboss.seam.mock.ResourceRequestEnvironment;
+import org.jboss.seam.mock.EnhancedMockHttpServletRequest;
+import org.jboss.seam.mock.EnhancedMockHttpServletResponse;
+import static org.jboss.seam.mock.ResourceRequestEnvironment.ResourceRequest;
+import static org.jboss.seam.mock.ResourceRequestEnvironment.Method;
+
+public class MyTest extends SeamTest {
+
+   ResourceRequestEnvironment sharedEnvironment;
+
+   @BeforeClass
+   public void prepareSharedEnvironment() throws Exception {
+       sharedEnvironment = new ResourceRequestEnvironment(this) {
+            @Override
+            public Map<String, Object> getDefaultHeaders() {
+               return new HashMap<String, Object>() {{
+                   put("Accept", "text/plain");
+               }};
+            }
+         };
+   }
+
+   @Test
+   public void test() throws Exception
+   {
+      //Not shared: new ResourceRequest(new ResourceRequestEnvironment(this), Method.GET, "/my/relative/uri)
+
+      new ResourceRequest(sharedEnvironment, Method.GET, "/my/relative/uri)
+      {
+         @Override
+         protected void prepareRequest(EnhancedMockHttpServletRequest request)
+         {
+            request.addQueryParameter("foo", "123");
+            request.addHeader("Accept-Language", "en_US, de");
+         }
+
+         @Override
+         protected void onResponse(EnhancedMockHttpServletResponse response)
+         {
+            assert response.getStatus() == 200;
+            assert response.getContentAsString().equals("foobar");
+         }
+
+      }.run();
+   }
+}]]></programlisting>
+
+         <para>
+            This test only executes local calls, it does not communicate with the <literal>SeamResourceServlet</literal>
+            through TCP. The mock request is passed through the Seam servlet and filters and the response is then
+            available for test assertions. Overriding the <literal>getDefaultHeaders()</literal> method in a shared
+            instance of <literal>ResourceRequestEnvironment</literal> allows you to set request headers for every
+            test method in the test class.
+         </para>
+
+         <para>
+            Note that a <literal>ResourceRequest</literal> has to be executed in a <literal>@Test</literal> method
+            or in a <literal>@BeforeMethod</literal> callback. You can not execute it in any other callback,
+            such as <literal>@BeforeClass</literal>.
+         </para>
+
+      </sect2>
+
+   </sect1>
+
+</chapter>

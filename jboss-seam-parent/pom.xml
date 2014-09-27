@@ -1,0 +1,1999 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>org.jboss.seam</groupId>
+	<artifactId>jboss-seam-parent</artifactId>
+	<name>Seam Parent</name>
+	<version>2.2.3</version>
+	<packaging>pom</packaging>
+
+	<licenses>
+		<license>
+			<name>LGPL</name>
+			<url>http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html</url>
+		</license>
+	</licenses>
+
+	<developers>
+		<developer>
+			<name>JBoss Seam committers</name>
+		</developer>
+	</developers>
+
+	<mailingLists>
+		<mailingList>
+			<archive>http://lists.jboss.org/pipermail/seam-dev/</archive>
+			<name>Seam Developer List</name>
+		</mailingList>
+	</mailingLists>
+	<description>Java EE 5 framework to get easy developing Java Enterprise applications</description>
+	<url>http://seamframework.org/Seam2</url>
+
+	<properties>
+		<!-- General properties -->
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<java.compiler.version>1.5</java.compiler.version>
+		<seam.docbook.version>1.1.0.GA</seam.docbook.version>
+		<jbossorg.docbook.version>1.1.0</jbossorg.docbook.version>
+		<pdf.name>${project.artifactId}.pdf</pdf.name>
+
+		<!-- Version string properties -->
+		<version.richfaces>3.3.3.Final</version.richfaces>
+		<version.wicket>1.4.14</version.wicket>
+		<version.drools>5.0.1</version.drools>
+		<version.testng>5.10</version.testng>
+		<version.resteasy>2.0-beta-2</version.resteasy>
+		<version.spring>2.5.6.SEC02</version.spring>
+		<version.jbossembedded>beta3.SP10</version.jbossembedded>
+        <version.emma>2.0.5312</version.emma>
+
+		<!-- ***************** -->
+		<!-- Repository Deployment URLs -->
+		<!-- ***************** -->
+		<jboss.releases.repo.url>https://repository.jboss.org/nexus/service/local/staging/deploy/maven2/</jboss.releases.repo.url>
+		<jboss.snapshots.repo.url>https://repository.jboss.org/nexus/content/repositories/snapshots/</jboss.snapshots.repo.url>
+		<maven.build.timestamp.format>yyyyMMdd-HHmm</maven.build.timestamp.format>
+	</properties>
+
+	<dependencyManagement>
+		<!-- Used to specify which version of a dependency to use - this means 
+			that versions are only specified here, not in sub project poms. All dependencies 
+			for all modules should be listed out here -->
+		<dependencies>
+			<dependency>
+				<groupId>org.jboss.seam</groupId>
+				<artifactId>distribution</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.jboss.seam</groupId>
+				<artifactId>seam-reference-guide</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<!-- All Seam modules -->
+			<dependency>
+				<groupId>org.jboss.seam</groupId>
+				<artifactId>jboss-seam</artifactId>
+				<version>${project.version}</version>
+				<type>ejb</type>
+			</dependency>
+
+			<dependency>
+				<groupId>org.jboss.seam</groupId>
+				<artifactId>jboss-seam-gen</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.jboss.seam</groupId>
+				<artifactId>jboss-seam-ioc</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.jboss.seam</groupId>
+				<artifactId>jboss-seam-mail</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.jboss.seam</groupId>
+				<artifactId>jboss-seam-pdf</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.jboss.seam</groupId>
+				<artifactId>jboss-seam-remoting</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.jboss.seam</groupId>
+				<artifactId>jboss-seam-resteasy</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.jboss.seam</groupId>
+				<artifactId>jboss-seam-ui</artifactId>
+				<version>${project.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>commons-logging</groupId>
+						<artifactId>commons-logging</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+
+			<dependency>
+				<groupId>org.jboss.seam</groupId>
+				<artifactId>jboss-seam-debug</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.jboss.seam</groupId>
+				<artifactId>jboss-seam-jul</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.jboss.seam</groupId>
+				<artifactId>jboss-seam-flex</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.jboss.seam</groupId>
+				<artifactId>jboss-seam-excel</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.jboss.seam</groupId>
+				<artifactId>jboss-seam-rss</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.jboss.seam</groupId>
+				<artifactId>jboss-seam-wicket</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>javax.servlet</groupId>
+				<artifactId>servlet-api</artifactId>
+				<version>2.5</version>
+			</dependency>
+
+			<dependency>
+				<groupId>javax.servlet.jsp</groupId>
+				<artifactId>jsp-api</artifactId>
+				<version>2.1</version>
+			</dependency>
+
+			<dependency>
+				<groupId>antlr</groupId>
+				<artifactId>antlr</artifactId>
+				<version>2.7.6</version>
+			</dependency>
+
+
+			<dependency>
+				<groupId>org.apache.ant</groupId>
+				<artifactId>ant</artifactId>
+				<version>1.7.0</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.apache.ant</groupId>
+						<artifactId>ant-launcher</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+
+			<dependency>
+				<groupId>org.apache.ant</groupId>
+				<artifactId>ant-antlr</artifactId>
+				<version>1.7.0</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.richfaces.framework</groupId>
+				<artifactId>richfaces-api</artifactId>
+				<version>${version.richfaces}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>commons-logging</groupId>
+						<artifactId>commons-logging</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>junit</groupId>
+						<artifactId>junit</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>javax.faces</groupId>
+						<artifactId>jsf-impl</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+
+			<dependency>
+				<groupId>org.richfaces.framework</groupId>
+				<artifactId>richfaces-impl</artifactId>
+				<version>${version.richfaces}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>commons-logging</groupId>
+						<artifactId>commons-logging</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>junit</groupId>
+						<artifactId>junit</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>xml-apis</groupId>
+						<artifactId>xml-apis</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+
+			<dependency>
+				<groupId>org.richfaces.ui</groupId>
+				<artifactId>richfaces-ui</artifactId>
+				<version>${version.richfaces}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>commons-logging</groupId>
+						<artifactId>commons-logging</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>javax.faces</groupId>
+						<artifactId>jsf-impl</artifactId>
+					</exclusion>
+
+				</exclusions>
+			</dependency>
+
+			<dependency>
+				<groupId>javax.faces</groupId>
+				<artifactId>jsf-api</artifactId>
+				<version>1.2_12</version>
+			</dependency>
+
+			<dependency>
+				<groupId>javax.faces</groupId>
+				<artifactId>jsf-impl</artifactId>
+				<version>1.2_12</version>
+				<exclusions>
+					<exclusion>
+						<groupId>commons-collections</groupId>
+						<artifactId>commons-collections</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>commons-logging</groupId>
+						<artifactId>commons-logging</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>commons-digester</groupId>
+						<artifactId>commons-digester</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+
+			<dependency>
+				<groupId>org.jbpm</groupId>
+				<artifactId>jbpm-jpdl</artifactId>
+				<version>3.2.2</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.hibernate</groupId>
+						<artifactId>hibernate</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+
+			<dependency>
+				<groupId>jboss</groupId>
+				<artifactId>jboss-cache</artifactId>
+				<version>1.4.1.SP9</version>
+			</dependency>
+
+			<dependency>
+				<groupId>net.sf.ehcache</groupId>
+				<artifactId>ehcache</artifactId>
+				<version>1.2.3</version>
+				<exclusions>
+					<exclusion>
+						<groupId>commons-collections</groupId>
+						<artifactId>commons-collections</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>commons-logging</groupId>
+						<artifactId>commons-logging</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+
+			<!-- You should adjust this in the initcore task in build.xml as well -->
+			<dependency>
+				<groupId>org.jboss.cache</groupId>
+				<artifactId>jbosscache-core</artifactId>
+				<version>2.2.0.CR6</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.jboss</groupId>
+						<artifactId>jboss-common-core</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>commons-logging</groupId>
+						<artifactId>commons-logging</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+
+			<dependency>
+				<groupId>jgroups</groupId>
+				<artifactId>jgroups</artifactId>
+				<version>2.4.1</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.jboss.resteasy</groupId>
+				<artifactId>resteasy-jaxrs</artifactId>
+				<version>${version.resteasy}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>commons-codec</groupId>
+						<artifactId>commons-codec</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>com.sun.xml.bind</groupId>
+						<artifactId>jaxb-impl</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>javax.annotation</groupId>
+						<artifactId>jsr250-api</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>commons-httpclient</groupId>
+						<artifactId>commons-httpclient</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>tjws</groupId>
+						<artifactId>webserver</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.scannotation</groupId>
+						<artifactId>scannotation</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-api</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-simple</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.apache.httpcomponents</groupId>
+						<artifactId>httpclient</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+
+			<dependency>
+				<groupId>org.jboss.resteasy</groupId>
+				<artifactId>resteasy-jaxb-provider</artifactId>
+				<version>${version.resteasy}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>com.sun.xml.bind</groupId>
+						<artifactId>jaxb-impl</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>com.sun.xml.stream</groupId>
+						<artifactId>sjsxp</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+
+			<dependency>
+				<groupId>org.jboss.resteasy</groupId>
+				<artifactId>resteasy-jettison-provider</artifactId>
+				<version>${version.resteasy}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.jboss.resteasy</groupId>
+				<artifactId>resteasy-atom-provider</artifactId>
+				<version>${version.resteasy}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>jcl-over-slf4j</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>net.jcip</groupId>
+						<artifactId>jcip-annotations</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+
+			<dependency>
+				<groupId>org.hibernate</groupId>
+				<artifactId>hibernate-core</artifactId>
+				<version>3.3.1.GA</version>
+				<exclusions>
+					<exclusion>
+						<groupId>commons-collections</groupId>
+						<artifactId>commons-collections</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>commons-logging</groupId>
+						<artifactId>commons-logging</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>net.sf.ehcache</groupId>
+						<artifactId>ehcache</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>junit</groupId>
+						<artifactId>junit</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-api</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+
+			<dependency>
+				<groupId>org.hibernate</groupId>
+				<artifactId>hibernate-annotations</artifactId>
+				<version>3.4.0.GA</version>
+				<exclusions>
+					<exclusion>
+						<groupId>junit</groupId>
+						<artifactId>junit</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.hibernate</groupId>
+						<artifactId>ejb3-persistence</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>commons-logging</groupId>
+						<artifactId>commons-logging</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+
+			<dependency>
+				<groupId>org.hibernate</groupId>
+				<artifactId>hibernate-entitymanager</artifactId>
+				<version>3.4.0.GA</version>
+				<exclusions>
+					<exclusion>
+						<groupId>commons-logging</groupId>
+						<artifactId>commons-logging</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.hibernate</groupId>
+						<artifactId>ejb3-persistence</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>jboss</groupId>
+						<artifactId>javassist</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+
+			<dependency>
+				<groupId>org.hibernate</groupId>
+				<artifactId>hibernate-validator</artifactId>
+				<version>3.1.0.GA</version>
+				<exclusions>
+					<exclusion>
+						<groupId>commons-collections</groupId>
+						<artifactId>commons-collections</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+
+			<dependency>
+				<groupId>org.hibernate</groupId>
+				<artifactId>hibernate-search</artifactId>
+				<version>3.1.1.GA</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.sun.facelets</groupId>
+				<artifactId>jsf-facelets</artifactId>
+				<version>1.1.15.B1</version>
+			</dependency>
+
+			<dependency>
+				<groupId>javax.el</groupId>
+				<artifactId>el-api</artifactId>
+				<version>1.0</version>
+			</dependency>
+
+			<dependency>
+				<groupId>commons-beanutils</groupId>
+				<artifactId>commons-beanutils</artifactId>
+				<version>1.7.0</version>
+				<exclusions>
+					<exclusion>
+						<groupId>commons-logging</groupId>
+						<artifactId>commons-logging</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>junit</groupId>
+						<artifactId>junit</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+
+			<dependency>
+				<groupId>commons-collections</groupId>
+				<artifactId>commons-collections</artifactId>
+				<version>3.2</version>
+			</dependency>
+
+			<dependency>
+				<groupId>commons-logging</groupId>
+				<artifactId>commons-logging</artifactId>
+				<version>1.1.1</version>
+			</dependency>
+
+			<dependency>
+				<groupId>commons-io</groupId>
+				<artifactId>commons-io</artifactId>
+				<version>1.3.1</version>
+			</dependency>
+
+			<dependency>
+				<groupId>commons-lang</groupId>
+				<artifactId>commons-lang</artifactId>
+				<version>2.3</version>
+			</dependency>
+
+			<dependency>
+				<groupId>commons-codec</groupId>
+				<artifactId>commons-codec</artifactId>
+				<version>1.2</version>
+			</dependency>
+
+			<dependency>
+				<groupId>commons-httpclient</groupId>
+				<artifactId>commons-httpclient</artifactId>
+				<version>3.1</version>
+			</dependency>
+
+			<dependency>
+				<groupId>javax.persistence</groupId>
+				<artifactId>persistence-api</artifactId>
+				<version>1.0</version>
+			</dependency>
+
+			<dependency>
+				<groupId>jboss</groupId>
+				<artifactId>jboss-system</artifactId>
+				<version>4.2.3.GA</version>
+			</dependency>
+
+			<dependency>
+				<groupId>jboss</groupId>
+				<artifactId>jbossxb</artifactId>
+				<version>1.0.0.CR8</version>
+				<exclusions>
+					<exclusion>
+						<groupId>jboss</groupId>
+						<artifactId>jboss-logging-spi</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>jboss</groupId>
+						<artifactId>jboss-common-core</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>apache-xerces</groupId>
+						<artifactId>xml-apis</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>apache-httpclient</groupId>
+						<artifactId>commons-httpclient</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>apache-slide</groupId>
+						<artifactId>webdavlib</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>oswego-concurrent</groupId>
+						<artifactId>concurrent</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>wutka-dtdparser</groupId>
+						<artifactId>dtdparser121</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>apache-xerces</groupId>
+						<artifactId>xercesImpl</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>javax.activation</groupId>
+						<artifactId>activation</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>sun-jaf</groupId>
+						<artifactId>activation</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+
+			<dependency>
+				<groupId>jboss</groupId>
+				<artifactId>jboss-jmx</artifactId>
+				<version>4.2.3.GA</version>
+			</dependency>
+
+			<!-- Excel export module dependency -->
+			<dependency>
+				<groupId>net.sourceforge.jexcelapi</groupId>
+				<artifactId>jxl</artifactId>
+				<version>2.6.8-seam</version>
+				<exclusions>
+					<exclusion>
+						<groupId>log4j</groupId>
+						<artifactId>log4j</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+
+			<dependency>
+				<groupId>net.sourceforge.yarfraw</groupId>
+				<artifactId>yarfraw</artifactId>
+				<version>0.92</version>
+				<exclusions>
+					<exclusion>
+						<groupId>javax.xml</groupId>
+						<artifactId>jaxb-api</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>com.sun.xml.bind</groupId>
+						<artifactId>jaxb-impl</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>commons-logging</groupId>
+						<artifactId>commons-logging</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>commons-codec</groupId>
+						<artifactId>commons-codec</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+
+			<dependency>
+				<groupId>javassist</groupId>
+				<artifactId>javassist</artifactId>
+				<version>3.12.0.GA</version>
+			</dependency>
+
+			<dependency>
+				<groupId>javax.portlet</groupId>
+				<artifactId>portlet-api</artifactId>
+				<version>1.0</version>
+			</dependency>
+
+			<dependency>
+				<groupId>javax.mail</groupId>
+				<artifactId>mail</artifactId>
+				<version>1.4</version>
+			</dependency>
+
+			<dependency>
+				<groupId>javax.xml.ws</groupId>
+				<artifactId>jaxws-api</artifactId>
+				<version>2.1</version>
+			</dependency>
+
+			<dependency>
+				<groupId>javax.ejb</groupId>
+				<artifactId>ejb-api</artifactId>
+				<version>3.0</version>
+			</dependency>
+
+			<dependency>
+				<groupId>javax.jws</groupId>
+				<artifactId>jsr181-api</artifactId>
+				<version>1.0-MR1</version>
+				<exclusions>
+					<exclusion>
+						<groupId>javax.xml.bind</groupId>
+						<artifactId>jaxb-api</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+
+			<dependency>
+				<groupId>javax.xml.soap</groupId>
+				<artifactId>saaj-api</artifactId>
+				<version>1.3</version>
+			</dependency>
+
+			<dependency>
+				<groupId>javax.jms</groupId>
+				<artifactId>jms</artifactId>
+				<version>1.1</version>
+			</dependency>
+
+			<dependency>
+				<groupId>javax.annotation</groupId>
+				<artifactId>jsr250-api</artifactId>
+				<version>1.0</version>
+			</dependency>
+
+			<dependency>
+				<groupId>javax.transaction</groupId>
+				<artifactId>jta</artifactId>
+				<version>1.1</version>
+			</dependency>
+
+			<dependency>
+				<groupId>javax.xml.bind</groupId>
+				<artifactId>jaxb-api</artifactId>
+				<version>2.1</version>
+				<exclusions>
+					<exclusion>
+						<groupId>javax.xml.stream</groupId>
+						<artifactId>stax-api</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>javax.activation</groupId>
+						<artifactId>activation</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+
+			<dependency>
+				<groupId>org.codehaus.groovy</groupId>
+				<artifactId>groovy-all</artifactId>
+				<version>1.5.4</version>
+				<exclusions>
+					<!-- groovy-all imports a lot of stuff, would be better to just use 
+						specific bits -->
+					<exclusion>
+						<groupId>bsf</groupId>
+						<artifactId>bsf</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>commons-cli</groupId>
+						<artifactId>commons-cli</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>commons-logging</groupId>
+						<artifactId>commons-logging</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>hsqldb</groupId>
+						<artifactId>hsqldb</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>junit</groupId>
+						<artifactId>junit</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>mx4j</groupId>
+						<artifactId>mx4j</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>xml-resolver</groupId>
+						<artifactId>xml-resolver</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>com.thoughtworks.xstream</groupId>
+						<artifactId>xstream</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>mockobjects</groupId>
+						<artifactId>mockobjects-core</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.apache.ant</groupId>
+						<artifactId>ant</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.apache.ant</groupId>
+						<artifactId>ant-launcher</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.apache.ant</groupId>
+						<artifactId>ant-junit</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>castor</groupId>
+						<artifactId>castor</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>openejb</groupId>
+						<artifactId>openejb</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>openejb</groupId>
+						<artifactId>openejb-loader</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>javax.servlet</groupId>
+						<artifactId>jsp-api</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>xerces</groupId>
+						<artifactId>xercesImpl</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>xml-apis</groupId>
+						<artifactId>xml-apis</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>jline</groupId>
+						<artifactId>jline</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+
+			<dependency>
+				<groupId>log4j</groupId>
+				<artifactId>log4j</artifactId>
+				<version>1.2.14</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.buni.meldware</groupId>
+				<artifactId>meldware-mailjmx</artifactId>
+				<version>1.0M8</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.buni.meldware</groupId>
+				<artifactId>meldware-mailapi</artifactId>
+				<version>1.0M8</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.drools</groupId>
+				<artifactId>drools-core</artifactId>
+				<version>${version.drools}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>junit</groupId>
+						<artifactId>junit</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>xpp3</groupId>
+						<artifactId>xpp3</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>com.thoughtworks.xstream</groupId>
+						<artifactId>xstream</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+
+			<dependency>
+				<groupId>org.drools</groupId>
+				<artifactId>drools-decisiontables</artifactId>
+				<version>${version.drools}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>jexcelapi</groupId>
+						<artifactId>jxl</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+            
+			<dependency>
+				<groupId>org.drools</groupId>
+				<artifactId>drools-api</artifactId>
+				<version>${version.drools}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.drools</groupId>
+				<artifactId>drools-templates</artifactId>
+				<version>${version.drools}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.drools</groupId>
+				<artifactId>drools-compiler</artifactId>
+				<version>${version.drools}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>junit</groupId>
+						<artifactId>junit</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>xpp3</groupId>
+						<artifactId>xpp3</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>com.thoughtworks.xstream</groupId>
+						<artifactId>xstream</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>xerces</groupId>
+						<artifactId>xercesImpl</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>xml-apis</groupId>
+						<artifactId>xml-apis</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+
+			<dependency>
+				<groupId>com.thoughtworks.xstream</groupId>
+				<artifactId>xstream</artifactId>
+				<version>1.3.1</version>
+			</dependency>
+
+			<dependency>
+				<groupId>xpp3</groupId>
+				<artifactId>xpp3_min</artifactId>
+				<version>1.1.3.4.O</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.jboss.el</groupId>
+				<artifactId>jboss-el</artifactId>
+				<version>1.0_02.CR6</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.jboss.seam.embedded</groupId>
+				<artifactId>jboss-embedded-api</artifactId>
+				<version>${version.jbossembedded}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>quartz</groupId>
+				<artifactId>quartz</artifactId>
+				<version>1.6.0</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring</artifactId>
+				<version>${version.spring}</version>
+				<exclusions>
+					<!-- Prevent the insanity which is commons-logging pom introducing dependencies 
+						on weird stuff -->
+					<exclusion>
+						<groupId>commons-logging</groupId>
+						<artifactId>commons-logging</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>junit</groupId>
+						<artifactId>junit</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+
+			<dependency>
+				<groupId>com.google.code.guice</groupId>
+				<artifactId>guice</artifactId>
+				<version>1.0</version>
+			</dependency>
+
+			<dependency>
+				<groupId>cglib</groupId>
+				<artifactId>cglib-nodep</artifactId>
+				<version>2.1_3</version>
+			</dependency>
+
+
+			<dependency>
+				<groupId>jboss.jboss-aop</groupId>
+				<artifactId>jboss-aop</artifactId>
+				<version>1.5.0.GA</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.jboss</groupId>
+				<artifactId>jboss-vfs</artifactId>
+				<version>2.0.0.Beta11</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.jboss</groupId>
+						<artifactId>jboss-common-core</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+
+			<dependency>
+				<groupId>jboss</groupId>
+				<artifactId>jboss-common-logging-spi</artifactId>
+				<version>2.0.4.GA</version>
+			</dependency>
+
+			<dependency>
+				<groupId>jboss</groupId>
+				<artifactId>jboss-common-core</artifactId>
+				<version>2.0.4.GA</version>
+				<exclusions>
+					<exclusion>
+						<groupId>apache-xerces</groupId>
+						<artifactId>xml-apis</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>apache-httpclient</groupId>
+						<artifactId>commons-httpclient</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>apache-slide</groupId>
+						<artifactId>webdavlib</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>jboss</groupId>
+						<artifactId>jboss-common-logging-spi</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+
+			<dependency>
+				<groupId>com.adobe.blazeds</groupId>
+				<artifactId>blazeds-common</artifactId>
+				<version>3.2.0.3978</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.adobe.blazeds</groupId>
+				<artifactId>blazeds-proxy</artifactId>
+				<version>3.2.0.3978</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.adobe.blazeds</groupId>
+				<artifactId>blazeds-core</artifactId>
+				<version>3.2.0.3978</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.adobe.blazeds</groupId>
+				<artifactId>blazeds-remoting</artifactId>
+				<version>3.2.0.3978</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.lowagie</groupId>
+				<artifactId>itext</artifactId>
+				<version>2.1.2</version>
+				<exclusions>
+					<exclusion>
+						<groupId>junit</groupId>
+						<artifactId>junit</artifactId>
+					</exclusion>
+
+					<exclusion>
+						<groupId>bouncycastle</groupId>
+						<artifactId>bcmail-jdk14</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>bouncycastle</groupId>
+						<artifactId>bcprov-jdk14</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+
+			<dependency>
+				<groupId>com.lowagie</groupId>
+				<artifactId>itext-rtf</artifactId>
+				<version>2.1.2</version>
+				<exclusions>
+					<exclusion>
+						<groupId>junit</groupId>
+						<artifactId>junit</artifactId>
+					</exclusion>
+
+					<exclusion>
+						<groupId>bouncycastle</groupId>
+						<artifactId>bcmail-jdk14</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>bouncycastle</groupId>
+						<artifactId>bcprov-jdk14</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+
+			<dependency>
+				<groupId>jfree</groupId>
+				<artifactId>jfreechart</artifactId>
+				<version>1.0.13</version>
+				<exclusions>
+					<exclusion>
+						<groupId>junit</groupId>
+						<artifactId>junit</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+
+            <dependency>
+                <groupId>org.openid4java</groupId>
+                <artifactId>openid4java-consumer</artifactId>
+                <version>0.9.6</version>
+                <type>pom</type>
+                <exclusions>
+                   <exclusion>
+                       <groupId>log4j</groupId>
+                       <artifactId>log4j</artifactId>
+                   </exclusion>
+
+                   <exclusion>
+                       <groupId>xerces</groupId>
+                       <artifactId>xercesImpl</artifactId>
+                   </exclusion>
+                   
+                   </exclusions>
+            </dependency>
+            
+			<dependency>
+				<groupId>com.google.gwt</groupId>
+				<artifactId>gwt-servlet</artifactId>
+				<version>1.5.2</version>
+			</dependency>
+            
+            <dependency>
+                <groupId>com.google.gwt</groupId>
+                <artifactId>gwt-user</artifactId>
+                <version>1.5.2</version>
+            </dependency>
+
+			<dependency>
+				<groupId>dom4j</groupId>
+				<artifactId>dom4j</artifactId>
+				<version>1.6.1-brew</version>
+				<exclusions>
+					<exclusion>
+						<groupId>xml-apis</groupId>
+						<artifactId>xml-apis</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+
+
+			<dependency>
+				<groupId>org.beanshell</groupId>
+				<artifactId>bsh</artifactId>
+				<version>2.0b4</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.tuckey</groupId>
+				<artifactId>urlrewritefilter</artifactId>
+				<version>3.0.4</version>
+				<exclusions>
+					<exclusion>
+						<groupId>junit</groupId>
+						<artifactId>junit</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>ant</groupId>
+						<artifactId>ant</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+
+			<dependency>
+				<groupId>org.dbunit</groupId>
+				<artifactId>dbunit</artifactId>
+				<version>2.2</version>
+				<exclusions>
+					<exclusion>
+						<groupId>junit</groupId>
+						<artifactId>junit</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>junit-addons</groupId>
+						<artifactId>junit-addons</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>poi</groupId>
+						<artifactId>poi</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>junit</groupId>
+						<artifactId>junit</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>commons-collections</groupId>
+						<artifactId>commons-collections</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>commons-logging</groupId>
+						<artifactId>commons-logging</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>commons-lang</groupId>
+						<artifactId>commons-lang</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+
+			<dependency>
+				<groupId>org.apache.wicket</groupId>
+				<artifactId>wicket</artifactId>
+				<version>${version.wicket}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>cglib</groupId>
+						<artifactId>cglib-nodep</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>asm</groupId>
+						<artifactId>asm</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+
+			<dependency>
+				<groupId>org.apache.wicket</groupId>
+				<artifactId>wicket-ioc</artifactId>
+				<version>${version.wicket}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>cglib</groupId>
+						<artifactId>cglib-nodep</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>asm</groupId>
+						<artifactId>asm</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>commons-collections</groupId>
+						<artifactId>commons-collections</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+
+			<dependency>
+				<groupId>org.apache.wicket</groupId>
+				<artifactId>wicket-extensions</artifactId>
+				<version>${version.wicket}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>cglib</groupId>
+						<artifactId>cglib-nodep</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>asm</groupId>
+						<artifactId>asm</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>commons-collections</groupId>
+						<artifactId>commons-collections</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+
+			<dependency>
+				<groupId>org.apache.wicket</groupId>
+				<artifactId>wicket-datetime</artifactId>
+				<version>${version.wicket}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.hibernate</groupId>
+				<artifactId>hibernate-tools</artifactId>
+				<version>3.2.4.GA</version>
+			</dependency>
+
+			<dependency>
+				<groupId>freemarker</groupId>
+				<artifactId>freemarker</artifactId>
+				<version>2.3.8</version>
+			</dependency>
+
+			<dependency>
+				<groupId>oswego-concurrent</groupId>
+				<artifactId>concurrent</artifactId>
+				<version>1.3.4</version>
+			</dependency>
+
+			<dependency>
+				<groupId>hsqldb</groupId>
+				<artifactId>hsqldb</artifactId>
+				<version>1.8.0.8-brew</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.eclipse.equinox</groupId>
+				<artifactId>common</artifactId>
+				<version>3.2.0-v20060603</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.eclipse.core</groupId>
+				<artifactId>runtime</artifactId>
+				<version>3.2.0-v20060603</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.eclipse</groupId>
+						<artifactId>osgi</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.eclipse.core</groupId>
+						<artifactId>jobs</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.eclipse.equinox</groupId>
+						<artifactId>registry</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.eclipse.equinox</groupId>
+						<artifactId>preferences</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.eclipse.equinox</groupId>
+						<artifactId>common</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.eclipse.core</groupId>
+						<artifactId>contenttype</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+
+			<dependency>
+				<groupId>org.eclipse</groupId>
+				<artifactId>text</artifactId>
+				<version>3.2.0-v20060605-1400</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.eclipse.core</groupId>
+						<artifactId>commands</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.eclipse.equinox</groupId>
+						<artifactId>common</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+
+			<dependency>
+				<groupId>emma</groupId>
+				<artifactId>emma</artifactId>
+				<version>2.0.5312</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.testng</groupId>
+				<artifactId>testng</artifactId>
+				<version>${version.testng}</version>
+				<classifier>jdk15</classifier>
+			</dependency>
+            
+            <dependency>
+                <groupId>org.seleniumhq.selenium.server</groupId>
+                <artifactId>selenium-server</artifactId>
+                <version>1.0.1</version>
+                <classifier>standalone</classifier>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.seleniumhq.selenium.core</groupId>
+                        <artifactId>selenium-core</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.seleniumhq.selenium.server</groupId>
+                        <artifactId>selenium-server-coreless</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.apache.ant</groupId>
+                        <artifactId>ant-trax</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.apache.ant</groupId>
+                        <artifactId>ant-nodeps</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+             
+            <dependency>
+                <groupId>org.seleniumhq.selenium.client-drivers</groupId>
+                <artifactId>selenium-java-client-driver</artifactId>
+                <version>1.0.1</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.codehaus.groovy.maven.runtime</groupId>
+                        <artifactId>gmaven-runtime-default</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+             
+            <dependency>
+                <groupId>org.seleniumhq.webdriver</groupId>
+                <artifactId>webdriver-firefox</artifactId>
+                <version>0.9.7376</version>
+            </dependency>
+             
+            <dependency>
+                <groupId>org.seleniumhq.webdriver</groupId>
+                <artifactId>webdriver-support</artifactId>
+                <version>0.9.7376</version>
+            </dependency>
+             
+            <dependency>
+                <groupId>org.seleniumhq.webdriver</groupId>
+                <artifactId>webdriver-ie</artifactId>
+                <version>0.9.7376</version>
+            </dependency>
+             
+            <dependency>
+                <groupId>org.jboss.seam</groupId>
+                <artifactId>functional-tests</artifactId>
+                <version>${project.version}</version>
+                <scope>test</scope>
+            </dependency>
+            
+            <dependency>
+                <groupId>javax.servlet</groupId>
+                <artifactId>jstl</artifactId>
+                <version>1.1.2</version>
+            </dependency>
+            
+            <dependency>
+                <groupId>commons-digester</groupId>
+                <artifactId>commons-digester</artifactId>
+                <version>2.1</version>
+            </dependency>
+            
+            <dependency>
+                <groupId>org.eclipse.jdt</groupId>
+                <artifactId>core</artifactId>
+                <version>3.4.2.v_883_R34x</version>
+            </dependency>
+            
+            <dependency>
+                <groupId>commons-fileupload</groupId>
+                <artifactId>commons-fileupload</artifactId>
+                <version>1.2.1</version>
+            </dependency>
+            
+            <dependency>
+                <groupId>commons-logging</groupId>
+                <artifactId>commons-logging-api</artifactId>
+                <version>1.1</version>
+            </dependency>
+            
+            <dependency>
+                <groupId>org.icefaces</groupId>
+                <artifactId>icefaces</artifactId>
+                <version>1.8.2</version>
+            </dependency>
+            
+            <dependency>
+                <groupId>org.icefaces</groupId>
+                <artifactId>icefaces-comps</artifactId>
+                <version>1.8.2</version>
+            </dependency>
+            
+            <dependency>
+                <groupId>org.icefaces</groupId>
+                <artifactId>icefaces-facelets</artifactId>
+                <version>1.8.2</version>
+            </dependency>
+            
+            <dependency>
+                <groupId>org.apache.myfaces.trinidad</groupId>
+                <artifactId>trinidad-api</artifactId>
+                <version>1.2.5</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.myfaces.trinidad</groupId>
+                <artifactId>trinidad-impl</artifactId>
+                <version>1.2.5</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.codehaus.jettison</groupId>
+                <artifactId>jettison</artifactId>
+                <version>1.1</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>stax</groupId>
+                        <artifactId>stax-api</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+
+            <dependency>
+                <groupId>org.metawidget</groupId>
+                <artifactId>metawidget-backend</artifactId>
+                <version>0.95</version>
+            </dependency>
+            
+            <dependency>
+                <groupId>org.metawidget</groupId>
+                <artifactId>metawidget-frontend</artifactId>
+                <version>0.95</version>
+            </dependency>
+            
+            <dependency>
+                <groupId>org.metawidget</groupId>
+                <artifactId>metawidget</artifactId>
+                <version>0.95</version>
+            </dependency>
+            
+		</dependencies>
+	</dependencyManagement>
+
+	<issueManagement>
+		<system>JIRA</system>
+		<url>http://issues.jboss.org/browse/JBSEAM</url>
+	</issueManagement>
+
+	<ciManagement>
+		<system>Hudson</system>
+		<url>http://hudson.jboss.org/hudson/view/Seam/</url>
+	</ciManagement>
+
+	<scm>
+		<connection>scm:svn:https://svn.jboss.org/repos/seam/branches/community/Seam_2_3</connection>
+		<developerConnection>scm:svn:https://svn.jboss.org/repos/seam/branches/community/Seam_2_3</developerConnection>
+		<url>scm:svn:https://svn.jboss.org/repos/seam/branches/community/Seam_2_3</url>
+	</scm>
+
+	<organization>
+		<name>Seam Framework</name>
+		<url>http://seamframework.org</url>
+	</organization>
+
+
+	<distributionManagement>
+		<repository>
+			<id>jboss-releases-repository</id>
+			<name>JBoss Releases Repository</name>
+			<url>${jboss.releases.repo.url}</url>
+		</repository>
+		<snapshotRepository>
+			<id>jboss-snapshots-repository</id>
+			<name>JBoss Snapshots Repository</name>
+			<url>${jboss.snapshots.repo.url}</url>
+		</snapshotRepository>
+	</distributionManagement>
+
+	<build>
+
+		<defaultGoal>package</defaultGoal>
+        <finalName>${project.artifactId}</finalName>
+		<pluginManagement>
+			<plugins>
+
+<!-- 				<plugin> -->
+<!-- 					<artifactId>maven-javadoc-plugin</artifactId> -->
+<!-- 					<version>2.7</version> -->
+<!-- 					<configuration> -->
+<!-- 						<links> -->
+<!-- 							<link>http://java.sun.com/j2se/5.0/docs/api</link> -->
+<!-- 						</links> -->
+<!-- 						<keywords>true</keywords> -->
+<!-- 						<author>true</author> -->
+<!-- 						<stylesheetfile>jdstyle.css</stylesheetfile> -->
+<!-- 						<doctitle>JBoss Seam ${project.name} API ${project.version}</doctitle> Used by javadoc:javadoc goal -->
+<!--                         <detectOfflineLinks>false</detectOfflineLinks> -->
+<!-- 					</configuration> -->
+<!-- 				</plugin> -->
+
+				<plugin>
+					<artifactId>maven-assembly-plugin</artifactId>
+					<version>2.2</version>
+				</plugin>
+
+				<!-- Building -->
+				<plugin>
+					<artifactId>maven-clean-plugin</artifactId>
+					<version>2.4.1</version>
+				</plugin>
+
+				<plugin>
+					<artifactId>maven-resources-plugin</artifactId>
+					<version>2.4.1</version>
+				</plugin>
+
+				<plugin>
+					<artifactId>maven-compiler-plugin</artifactId>
+ 					<version>2.3.2</version>
+					<configuration>
+						<source>${java.compiler.version}</source>
+						<target>${java.compiler.version}</target>
+				        <optimize>true</optimize>
+				        <!-- javac doesn't compile all package-info.java, 
+				        therefore use eclipse compiler -->
+				        <compilerId>eclipse</compilerId>
+					</configuration>
+					<dependencies>
+				        <dependency>
+				            <groupId>org.codehaus.plexus</groupId>
+				            <artifactId>plexus-compiler-eclipse</artifactId>
+				            <version>1.8.1</version>
+				            <scope>runtime</scope>
+				        </dependency>
+				    </dependencies>
+					
+				</plugin>
+
+				<plugin>
+					<artifactId>maven-surefire-report-plugin</artifactId>
+					<version>2.6</version>
+				</plugin>
+
+				<plugin>
+					<artifactId>maven-surefire-plugin</artifactId>
+					<version>2.6</version>
+				</plugin>
+
+				<plugin>
+					<artifactId>maven-source-plugin</artifactId>
+					<version>2.1.2</version>
+					<configuration>
+                    <archive>
+                        <manifestEntries>
+                            <Implementation-Version>${project.version}</Implementation-Version>
+                            <Specification-Version>${project.version}</Specification-Version>
+                            <Specification-Title>${project.name}</Specification-Title>
+                            <Specification-Vendor>${project.organization.name}</Specification-Vendor>
+                            <Implementation-Title>${project.name}</Implementation-Title>
+                            <Implementation-Vendor>${project.organization.name}</Implementation-Vendor>
+                        </manifestEntries>
+                        <manifestSections>
+                            <manifestSection>
+                                <name>Build-Information</name>
+                                <manifestEntries>
+                                    <Java-Version>${java.version}</Java-Version>
+                                    <Java-Vendor>${java.vendor}</Java-Vendor>
+                                    <Build-Time>${maven.build.timestamp}</Build-Time>
+                                </manifestEntries>
+                            </manifestSection>
+                        </manifestSections>
+                    </archive>
+                </configuration>
+				</plugin>
+
+				<plugin>
+					<artifactId>maven-install-plugin</artifactId>
+					<version>2.3.1</version>
+				</plugin>
+
+				<plugin>
+					<artifactId>maven-deploy-plugin</artifactId>
+					<version>2.5</version>
+				</plugin>
+
+				<plugin>
+					<artifactId>maven-war-plugin</artifactId>
+					<version>2.1.1</version>
+					<inherited>true</inherited>
+					<configuration>
+						<failOnMissingWebXml>false</failOnMissingWebXml>
+						<warName>${project.build.finalName}</warName>
+					</configuration>
+				</plugin>
+
+				<plugin>
+					<artifactId>maven-ear-plugin</artifactId>
+					<version>2.4.2</version>
+				</plugin>
+
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>build-helper-maven-plugin</artifactId>
+					<version>1.5</version>
+				</plugin>
+
+				<plugin>
+					<artifactId>maven-site-plugin</artifactId>
+					<version>2.2</version>
+				</plugin>
+			<plugin>
+	            <artifactId>maven-enforcer-plugin</artifactId>
+	            <version>1.0</version>
+	            <executions>
+	               <execution>
+	                  <id>enforce</id>
+	                  <phase>none</phase>
+	               </execution>
+	               <execution>
+	                  <id>seam-build-req</id>
+	                  <goals>
+	                     <goal>enforce</goal>
+	                  </goals>
+	                  <inherited>true</inherited>
+	                  <configuration>
+	                     <rules>
+	                        <requireJavaVersion>
+	                           <version>1.5.0</version>
+	                        </requireJavaVersion>
+	                        <requireMavenVersion>
+	                           <version>[3.0.0,)</version>
+	                        </requireMavenVersion>
+	                     </rules>
+	                  </configuration>
+	               </execution>
+	            </executions>
+	         </plugin>
+	         <!-- Packaging -->
+	         <plugin>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>2.3.2</version>
+				<configuration>
+					<archive>
+						<manifestEntries>
+							<Implementation-Version>${project.version}</Implementation-Version>
+							<Specification-Version>${project.version}</Specification-Version>
+							<Specification-Title>${project.name}</Specification-Title>
+							<Specification-Vendor>${project.organization.name}</Specification-Vendor>
+							<Implementation-Title>${project.name}</Implementation-Title>
+							<Implementation-Vendor>${project.organization.name}</Implementation-Vendor>
+						</manifestEntries>
+						<manifestSections>
+							<manifestSection>
+								<name>Build-Information</name>
+								<manifestEntries>
+									<Java-Version>${java.version}</Java-Version>
+									<Java-Vendor>${java.vendor}</Java-Vendor>
+									<Build-Time>${maven.build.timestamp}</Build-Time>
+								</manifestEntries>
+							</manifestSection>
+						</manifestSections>
+					</archive>
+				</configuration>
+			</plugin><!-- just for jboss-seam core as it is EJB type not jar --><plugin>
+				<artifactId>maven-ejb-plugin</artifactId>
+				<version>2.3</version>
+				<configuration>
+					<ejbVersion>3.0</ejbVersion>
+					<archive>
+						<manifestEntries>
+							<Implementation-Version>${project.version}</Implementation-Version>
+							<Specification-Version>${project.version}</Specification-Version>
+							<Specification-Title>${project.name}</Specification-Title>
+							<Specification-Vendor>${project.organization.name}</Specification-Vendor>
+							<Implementation-Title>${project.name}</Implementation-Title>
+							<Implementation-Vendor>${project.organization.name}</Implementation-Vendor>
+						</manifestEntries>
+						<manifestSections>
+							<manifestSection>
+								<name>Build-Information</name>
+								<manifestEntries>
+									<Java-Version>${java.version}</Java-Version>
+									<Java-Vendor>${java.vendor}</Java-Vendor>
+									<Build-Time>${maven.build.timestamp}</Build-Time>
+								</manifestEntries>
+							</manifestSection>
+						</manifestSections>
+					</archive>
+				</configuration>
+			</plugin></plugins>
+		</pluginManagement>
+
+	<plugins>
+		<plugin>
+			<artifactId>maven-source-plugin</artifactId>
+			<version>2.1.2</version>
+			<executions>
+				<execution>
+					<id>attach-sources</id>
+					<phase>package</phase>
+					<goals>
+						<goal>jar</goal>
+					</goals>
+				</execution>
+			</executions>
+		</plugin>
+	   </plugins>
+	</build>
+
+	<dependencies>
+
+	</dependencies>
+
+	<modules>
+		<module>../jboss-seam-gen</module>
+		<module>../jboss-seam-ui</module>
+		<module>../jboss-seam-debug</module>
+		<module>../jboss-seam-excel</module>
+		<module>../jboss-seam-flex</module>
+		<module>../jboss-seam-mail</module>
+		<module>../jboss-seam-pdf</module>
+		<module>../jboss-seam-remoting</module>
+		<module>../jboss-seam-resteasy</module>
+		<module>../jboss-seam-rss</module>
+		<module>../jboss-seam-wicket</module>
+		<module>../jboss-seam-ioc</module>
+		<module>../jboss-seam-jul</module>
+		<module>../jboss-seam</module>
+		<module>../jboss-embedded-bootstrap</module>
+		<module>../seam-integration-tests</module>
+		<module>../functional-tests</module>
+<!-- 		<module>../examples</module> -->
+	</modules>
+	
+	<profiles>
+	   <!-- Profile for generating Seam reference documentation  -->
+	   <profile>
+	       <id>doc</id>
+	       <modules>
+	           <module>../seam-reference-guide</module>
+	       </modules>
+	   </profile>
+	   <profile>
+           <id>distribution</id>
+           <modules>
+               <module>../examples</module>
+               <module>../seam-reference-guide</module>
+               <module>../distribution</module>
+           </modules>
+           <build>
+           	<plugins>
+	           	<plugin>
+                    <artifactId>maven-assembly-plugin</artifactId>
+                    <executions>
+                        <execution>
+                            <id>project-distribution</id>
+                            <phase>package</phase>
+                            <goals>
+                                <goal>single</goal>
+                            </goals>
+                            <configuration>
+                      			<descriptorRefs>
+                      				<descriptorRef>project</descriptorRef>
+                      			</descriptorRefs>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>         
+           	</plugins>           	
+           </build>
+           
+       </profile>
+       <profile>
+         <id>code-coverage</id>
+         <activation>
+            <property>
+               <name>code-coverage</name>
+            </property>
+         </activation>
+         <dependencies>
+            <dependency>
+                <groupId>emma</groupId>
+                <artifactId>emma</artifactId>
+                <version>${version.emma}</version>
+            </dependency>
+         </dependencies>
+         <build>
+            <pluginManagement>
+               <plugins>
+                  <plugin>
+                     <groupId>org.codehaus.mojo</groupId>
+                     <artifactId>emma-maven-plugin</artifactId>
+                     <version>1.0-alpha-2</version>
+                     <executions>
+                        <execution>
+                           <id>instrumentation</id>
+                           <phase>process-classes</phase>
+                           <goals>
+                              <goal>instrument</goal>
+                           </goals>
+                           <configuration>
+                              <verbose>true</verbose>
+                           </configuration>
+                        </execution>
+                        <execution>
+                           <id>instrumentation-clean</id>
+                           <phase>clean</phase>
+                           <goals>
+                              <goal>clean</goal>
+                           </goals>
+                        </execution>
+                     </executions>
+                  </plugin>
+                  <plugin>
+                      <groupId>org.apache.maven.plugins</groupId>
+                      <artifactId>maven-antrun-plugin</artifactId>
+                      <executions>
+                         <execution>
+                            <id>complete-classpath-for-tests</id>
+                            <phase>process-classes</phase>
+                            <goals>
+                               <goal>run</goal>
+                            </goals>
+                            <configuration>
+                               <tasks>
+                                  <copy todir="${project.build.directory}/classes" overwrite="true">
+                                     <fileset dir="${project.build.directory}/generated-classes/emma/classes">
+                                        <include name="**/*" />
+                                     </fileset>
+                                  </copy>
+                               </tasks>
+                            </configuration>
+                         </execution>
+                      </executions>
+                  </plugin>
+                  <plugin>
+                     <groupId>org.apache.maven.plugins</groupId>
+                     <artifactId>maven-surefire-plugin</artifactId>
+                     <inherited>true</inherited>
+                     <configuration>
+                        <forkMode>once</forkMode>
+                        <classesDirectory>${project.build.outputDirectory}</classesDirectory>
+                     </configuration>
+                  </plugin>
+                  <plugin>
+                     <groupId>org.sonatype.maven.plugin</groupId>
+                     <artifactId>emma4it-maven-plugin</artifactId>
+                     <version>1.3</version>
+                     <executions>
+                        <execution>
+                           <id>report</id>
+                           <phase>test</phase>
+                           <goals>
+                              <goal>report</goal>
+                           </goals>
+                           <configuration>
+                              <sourceSets>
+                                 <sourceSet>
+                                    <directory>${project.build.sourceDirectory}</directory>
+                                 </sourceSet>
+                              </sourceSets>
+                           </configuration>
+                        </execution>
+                     </executions>
+                  </plugin>
+                  <plugin>
+                     <artifactId>maven-clean-plugin</artifactId>
+                     <configuration>
+                        <filesets>
+                           <fileset>
+                              <directory>${basedir}/</directory>
+                              <includes>
+                                 <include>**/*.ec</include>
+                                 <include>**/*.em</include>
+                              </includes>
+                              <followSymlinks>false</followSymlinks>
+                           </fileset>
+                        </filesets>
+                     </configuration>
+                  </plugin>
+               </plugins>
+            </pluginManagement>
+         </build>
+      </profile>
+      <profile>
+        <id>release</id>
+        <build>
+            <plugins>
+                <plugin>
+                    <artifactId>maven-release-plugin</artifactId>
+                    <version>2.2.1</version>
+			        <configuration>
+			          <tagBase>https://svn.jboss.org/repos/seam/tags</tagBase>
+			          <stagingRepository>https://repository.jboss.org/nexus/content/groups/staging</stagingRepository>
+			          <tagNameFormat>JBoss_Seam_@{project.version}</tagNameFormat>
+			          <autoVersionSubmodules>true</autoVersionSubmodules>
+			        </configuration>
+                </plugin>
+            </plugins>
+        </build>
+        <modules>
+            <module>../seam-reference-guide</module>
+        </modules>
+      </profile>
+	</profiles>
+
+
+</project>

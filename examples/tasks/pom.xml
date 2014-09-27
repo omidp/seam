@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>org.jboss.seam.examples</groupId>
+    <artifactId>tasks</artifactId>
+    <parent>
+        <groupId>org.jboss.seam</groupId>
+        <artifactId>examples</artifactId>
+        <version>2.2.3</version>
+    </parent>
+    <packaging>pom</packaging>
+    <name>Tasks Example</name>
+    
+    <properties>
+        <example.name>tasks</example.name>
+    </properties>
+    
+    <modules>
+        <module>tasks-ear</module>
+        <module>tasks-ejb</module>
+        <module>tasks-web</module>
+        <module>tasks-tests</module>
+    </modules>
+    
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.jboss.seam.examples</groupId>
+                <artifactId>tasks-ejb</artifactId>
+                <version>${project.version}</version>
+                <type>ejb</type>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.seam.examples</groupId>
+                <artifactId>tasks-web</artifactId>
+                <version>${project.version}</version>
+                <type>war</type>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.seam.examples</groupId>
+                <artifactId>tasks-ear</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+</project>

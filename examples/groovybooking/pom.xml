@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>org.jboss.seam.examples</groupId>
+    <artifactId>groovybooking</artifactId>
+    <parent>
+        <groupId>org.jboss.seam</groupId>
+        <artifactId>examples</artifactId>
+        <version>2.2.3</version>
+    </parent>
+    <packaging>pom</packaging>
+    <name>Groovy Booking Example</name>
+    
+    <properties>
+        <example.name>groovybooking</example.name>
+    </properties>
+    
+    <modules>
+        <module>groovybooking-web</module>
+        <module>groovybooking-tests</module>
+    </modules>
+    
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.jboss.seam.examples</groupId>
+                <artifactId>groovybooking-web</artifactId>
+                <version>${project.version}</version>
+                <type>war</type>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+</project>

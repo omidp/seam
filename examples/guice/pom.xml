@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <parent>
+        <artifactId>examples</artifactId>
+        <groupId>org.jboss.seam</groupId>
+        <version>2.2.3</version>
+    </parent>
+    
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>org.jboss.seam.examples</groupId>
+    <artifactId>guice</artifactId>
+    <packaging>pom</packaging>
+    <name>Guice Example</name>
+  
+    <modules>
+        <module>guice-ejb</module>
+        <module>guice-web</module>
+        <module>guice-ear</module>
+        <module>guice-tests</module>
+    </modules>
+
+    <properties>
+        <example.name>guice</example.name>
+    </properties>
+    
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.jboss.seam.examples</groupId>
+                <artifactId>guice-ejb</artifactId>
+                <version>${project.version}</version>
+                <type>ejb</type>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.seam.examples</groupId>
+                <artifactId>guice-web</artifactId>
+                <version>${project.version}</version>
+                <type>war</type>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.seam.examples</groupId>
+                <artifactId>guice-ear</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+</project>

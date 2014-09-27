@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>org.jboss.seam.examples</groupId>
+	<artifactId>mail</artifactId>
+	<parent>
+		<groupId>org.jboss.seam</groupId>
+		<artifactId>examples</artifactId>
+		<version>2.2.3</version>
+	</parent>
+    <packaging>pom</packaging>
+    <name>Seam Mail Example</name>
+    
+    <properties>
+        <example.name>mail</example.name>
+    </properties>
+    
+    <modules>
+    	<module>mail-ear</module>
+    	<module>mail-ejb</module>
+    	<module>mail-web</module>
+    	<module>mail-tests</module>
+    </modules>
+    
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.jboss.seam.examples</groupId>
+                <artifactId>mail-ejb</artifactId>
+                <version>${project.version}</version>
+                <type>ejb</type>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.seam.examples</groupId>
+                <artifactId>mail-web</artifactId>
+                <version>${project.version}</version>
+                <type>war</type>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.seam.examples</groupId>
+                <artifactId>mail-ear</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+</project>

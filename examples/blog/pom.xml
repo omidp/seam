@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <parent>
+        <artifactId>examples</artifactId>
+        <groupId>org.jboss.seam</groupId>
+        <version>2.2.3</version>
+    </parent>
+    
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>org.jboss.seam.examples</groupId>
+    <artifactId>blog</artifactId>
+    <packaging>pom</packaging>
+    <name>Blog Example</name>
+  
+    <modules>
+        <module>blog-ejb</module>
+        <module>blog-web</module>
+        <module>blog-ear</module>
+        <module>blog-tests</module>
+    </modules>
+
+    <properties>
+        <example.name>blog</example.name>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.jboss.seam.examples</groupId>
+                <artifactId>blog-ejb</artifactId>
+                <version>${project.version}</version>
+                <type>ejb</type>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.seam.examples</groupId>
+                <artifactId>blog-web</artifactId>
+                <version>${project.version}</version>
+                <type>war</type>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.seam.examples</groupId>
+                <artifactId>blog-ear</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+    
+    <profiles>
+        <profile>
+            <id>jbossas6</id>
+            <properties>
+                <hibernate.search.version>3.3.0.Final</hibernate.search.version>
+                <org.apache.lucene.version>3.0.3</org.apache.lucene.version>
+            </properties>
+        </profile>
+    </profiles>
+
+</project>

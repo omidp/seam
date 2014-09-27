@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <artifactId>gwt</artifactId>
+        <groupId>org.jboss.seam.examples.remoting</groupId>
+        <version>2.2.3</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+    
+    <groupId>org.jboss.seam.examples.remoting</groupId>
+    <artifactId>gwt-web</artifactId>
+    <packaging>war</packaging>
+    <name>Gwt Web Module</name>
+    
+    <properties>
+        <!-- filtering property for components.xml -->
+        <jndiPattern>seam-gwt/#{ejbName}/local</jndiPattern>
+    </properties>
+    
+    <dependencies>
+    </dependencies>
+  
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <configuration>
+                    <webResources>
+                        <resource>
+                            <directory>src/main/webapp</directory>
+                            <filtering>true</filtering>
+                        </resource>
+                    </webResources>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-resources-plugin</artifactId>
+                    <executions>
+                        <execution>
+                            <id>copy-resources</id>
+                            <phase>validate</phase>
+                            <goals>
+                                <goal>copy-resources</goal>
+                            </goals>
+                            <configuration>
+                                <outputDirectory>${project.build.directory}/${project.build.finalName}</outputDirectory>
+                                <resources>          
+                                    <resource>
+                                        <directory>${basedir}/../gwt-ejb/target/gwt-ejb-${project.version}/org.jboss.seam.example.remoting.gwt.HelloWorld</directory>
+                                        <includes>
+                                            <include>**/*</include>
+                                        </includes>
+                                    </resource>
+                              </resources>              
+                            </configuration>            
+                        </execution>
+                    </executions>
+                </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>jboss-maven-plugin</artifactId>
+                <configuration>
+                    <jbossHome>${jboss.home}</jbossHome>
+                    <serverName>${jboss.domain}</serverName>
+                    <fileNames>
+                        <param>${project.build.directory}/${project.build.finalName}.${project.packaging}</param>
+                    </fileNames>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+  
+</project>

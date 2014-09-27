@@ -1,0 +1,14 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <parent>
+        <artifactId>jboss-seam-parent</artifactId>
+        <groupId>org.jboss.seam</groupId>
+        <version>2.2.3</version>
+        <relativePath>../jboss-seam-parent/pom.xml</relativePath>
+    </parent>
+
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>org.jboss.seam</groupId>
+    <artifactId>jboss-embedded-bootstrap</artifactId>
+    <name>JBoss Embedded Bootstrap</name>
+</project>

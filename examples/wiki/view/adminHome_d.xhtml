@@ -1,0 +1,467 @@
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:s="http://jboss.com/products/seam/taglib"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:a="https://ajax4jsf.dev.java.net/ajax"
+                xmlns:wiki="http://jboss.com/products/seam/wiki"
+                template="themes/#{preferences.get('Wiki').themeName}/template.xhtml">
+
+<ui:define name="screenname">
+    <h:outputText value="#{messages['lacewiki.label.adminHome.Administration']}"/>
+</ui:define>
+
+<ui:define name="controlTwo">
+
+    <s:link id="close" styleClass="linkNavigation sessionEventTrigger" view="/wiki.xhtml" propagation="end"
+            accesskey="#{messages['lacewiki.button.Close.accesskey']}">
+        <h:outputText escape="false" value="#{messages['lacewiki.button.Close']}"/>
+    </s:link>
+
+</ui:define>
+
+<ui:define name="content">
+
+<script type="text/javascript" src="seam/resource/remoting/interface.js?adminHome"></script>
+<script type="text/javascript">
+    Seam.Remoting.displayLoadingMessage = function() {};
+    Seam.Remoting.hideLoadingMessage = function() {};
+
+    var adminHome = Seam.Component.getInstance("adminHome");
+
+    jQuery(function() { jQuery("#indexingProgressbarContainer").hide(); } );
+    function getIndexingProgress(ofOperation) {
+        Seam.Remoting.getContext().setConversationId('#{conversation.id}');
+        adminHome.getIndexingProgress(ofOperation, indexingProgressCallback);
+    }
+    function indexingProgressCallback(progress) {
+        if (progress != null &amp;&amp; progress.status == 'Complete') {
+            adminHome.resetIndexingProgress(progress.ofOperation);
+            jQuery(".resetIndexButton").show();
+            jQuery("#indexingProgressbarContainer").hide();
+            reloadIndexStatistics();
+        } else if (progress != null) {
+            jQuery(".resetIndexButton").hide();
+            jQuery("#indexingProgressbarContainer").show();
+            jQuery("#indexingProgressbar").reportprogress(progress.percentComplete);
+            jQuery("#indexingProgressbarLabel").empty();
+            jQuery("#indexingProgressbarLabel").append(progress.status);
+            setTimeout("getIndexingProgress('" + progress.ofOperation + "')", 1000);
+        }
+    }
+</script>
+
+<h:form id="adminForm" styleClass="box">
+    <div class="form">
+
+        <script type="text/javascript">startSessionTimeoutCheck()</script>
+
+        <script type="text/javascript">jQuery(function() {
+            jQuery('#formTabs').tabs(2, {onClick: function(){formTabClicked()} });
+        });</script>
+        <div id="formTabs">
+
+        <ul>
+            <li class="formTabsTitle">
+                <h:outputText value="#{messages['lacewiki.label.adminHome.Administration']}"/>
+            </li>
+            <li id="systemStatsTab"><a href="#systemStats"
+                                       accesskey="#{messages['lacewiki.button.adminHome.SystemStatistics.accesskey']}">
+                <h:outputText escape="false" value="#{messages['lacewiki.button.adminHome.SystemStatistics']}"/>
+            </a></li>
+            <!--li id="rolesPermissionsTab"><a href="#rolesPermissions"
+                                            accesskey="#{messages['lacewiki.button.adminHome.RolesPermissions.accesskey']}">
+                <h:outputText escape="false" value="#{messages['lacewiki.button.adminHome.RolesPermissions']}"/>
+            </a></li-->
+            <li id="pluginsTab"><a href="#plugins"
+                                            accesskey="#{messages['lacewiki.button.adminHome.Plugins.accesskey']}">
+                <h:outputText escape="false" value="#{messages['lacewiki.button.adminHome.Plugins']}"/>
+            </a></li>
+            <li id="linkProtocolsTab"><a href="#linkProtocols"
+                                         accesskey="#{messages['lacewiki.button.adminHome.LinkProtocols.accesskey']}">
+                <h:outputText escape="false" value="#{messages['lacewiki.button.adminHome.LinkProtocols']}"/>
+            </a></li>
+            <li id="systemPrefsTab"><a href="#systemPrefs"
+                                       accesskey="#{messages['lacewiki.button.adminHome.Preferences.accesskey']}">
+                <h:outputText escape="false" value="#{messages['lacewiki.button.adminHome.Preferences']}"/>
+            </a></li>
+            
+            <li id="spamReportTab"><a href="#spamReport">
+                <h:outputText escape="false" value="#{messages['lacewiki.button.adminHome.SpamReport']}"/>
+            </a></li>   
+                     
+            <li id="blacklistTab"><a href="#blacklist">
+                <h:outputText escape="false" value="#{messages['lacewiki.button.adminHome.Blacklist']}"/>
+            </a></li>                           
+            
+        </ul>
+
+        <div id="formTabsTitle"/>
+
+        <div id="systemStats">
+            <div class="formFields" style="padding: 20px;">
+
+                <a:region>
+
+                <a:jsFunction name="reloadIndexStatistics"
+                              reRender="indexStatistics"
+                              action="#{adminHome.loadIndexedEntities}"/>
+                <div id="indexingProgressbarContainer" class="progressbarContainer">
+                    <span id="indexingProgressbarLabel" class="progressbarLabel"/>
+                    <div id="indexingProgressbar" class="progressbar"/>
+                </div>
+
+                <h:dataTable id="indexStatistics" var="ie"
+                             value="#{indexedEntities}"
+                             rendered="#{indexedEntities.rowCount >0}"
+                             styleClass="datatable topLeftBottomBorder"
+                             headerClass="regularHeader rightBorder smallFont"
+                             columnClasses="twentyPercentColumn rightBorder alignLeft,
+                                            tenPercentColumn rightBorder alignCenter,
+                                            tenPercentColumn rightBorder alignCenter,
+                                            tenPercentColumn rightBorder alignRight,
+                                            tenPercentColumn rightBorder alignCenter"
+                             rowClasses="rowOdd,rowEven"
+                             cellpadding="0" cellspacing="0" border="0">
+
+                    <h:column>
+                        <f:facet name="header">
+                            #{messages['lacewiki.label.adminHome.SearchIndex']}
+                        </f:facet>
+                        #{ie.description}
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">
+                            #{messages['lacewiki.label.adminHome.NumOfIndexedDocuments']}
+                        </f:facet>
+                        #{ie.numOfIndexedDocuments}
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">
+                            #{messages['lacewiki.label.adminHome.NumOfIndexedTerms']}
+                        </f:facet>
+                        #{ie.numOfIndexedTerms}
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">
+                            #{messages['lacewiki.label.adminHome.IndexSize']}
+                        </f:facet>
+                        #{wiki:displayFilesize(ie.indexSizeInBytes)}
+                    </h:column>
+                    <h:column>
+                        <script type="text/javascript">
+                            jQuery(function(){ getIndexingProgress("#{ie.clazz.name}") });
+                        </script>
+                        <a:commandLink status="globalStatus" id="resetSearchIndex" styleClass="button resetIndexButton sessionEventTrigger" reRender="indexStatistics"
+                                       action="#{adminHome.resetSearchIndex()}" oncomplete="onAjaxRequestComplete()">
+                            <h:outputText styleClass="buttonLabel" value="#{messages['lacewiki.button.adminHome.RebuildIndex']}"/>
+                        </a:commandLink>
+                    </h:column>
+                </h:dataTable>
+
+                </a:region>
+
+                <br/>
+                <br/>
+
+                <a:region>
+                    <ui:include src="includes/admin/sessionManager.xhtml"/>
+                </a:region>
+
+            </div>
+        </div>
+
+        <div id="rolesPermissions">
+            Not Implemented
+        </div>
+
+        <div id="plugins">
+            <ui:include src="includes/admin/pluginEditor.xhtml"/>
+        </div>
+
+        <div id="linkProtocols">
+            <s:div id="linkProtocolsRegion" styleClass="formFields" style="padding: 20px;">
+            <a:region>
+
+            <h:dataTable id="linkProtocolTable" var="lp"
+                         value="#{linkProtocols}"
+                         rendered="#{linkProtocols.rowCount >0}"
+                         styleClass="datatable topLeftBottomBorder"
+                         headerClass="regularHeader rightBorder smallFont"
+                         columnClasses="twentyPercentColumn rightBorder alignLeft,
+                                        defaultColumn rightBorder alignLeft,
+                                        tenPercentColumn rightBorder alignCenter"
+                         rowClasses="rowOdd,rowEven"
+                         cellpadding="0" cellspacing="0" border="0">
+
+                <h:column>
+                    <f:facet name="header">
+                        #{messages['lacewiki.label.adminHome.Prefix']}
+                    </f:facet>
+                    #{lp.prefix}
+                </h:column>
+                <h:column>
+                    <f:facet name="header">
+                        #{messages['lacewiki.label.adminHome.TargetLink']}
+                    </f:facet>
+                    #{lp.link}
+                </h:column>
+                <h:column>
+                    <a:commandLink status="globalStatus" id="removeLinkProtocol"
+                                   styleClass="buttonNonpersistent sessionEventTrigger" reRender="linkProtocolsRegion"
+                                   action="#{adminHome.removeLinkProtocol()}" oncomplete="onAjaxRequestComplete()">
+                        <h:outputText styleClass="buttonLabel" value="#{messages['lacewiki.button.Remove']}"/>
+                    </a:commandLink>
+                </h:column>
+            </h:dataTable>
+            </a:region>
+
+            <a:region>
+            <s:div id="linkProtocolForm" styleClass="formFields wideLabels">
+
+                <s:decorate id="prefixDecorate" template="includes/formFieldDecorate.xhtml">
+                    <ui:define name="label">#{messages['lacewiki.label.adminHome.Prefix']}</ui:define>
+                    <h:inputText id="prefix" value="#{adminHome.linkProtocol.prefix}" maxlength="10" size="10" tabindex="1"/>
+                </s:decorate>
+
+                <s:decorate id="linkDecorate" template="includes/formFieldDecorate.xhtml">
+                    <ui:define name="label">#{messages['lacewiki.label.adminHome.TargetWithPlaceHolder']}</ui:define>
+                    <h:inputText id="link" value="#{adminHome.linkProtocol.link}" maxlength="1000" size="40" tabindex="1"/>
+                </s:decorate>
+
+                <div class="entry">
+                    <div class="label">&#160;</div>
+                    <div class="input">
+                        <a:commandLink status="globalStatus" id="addLinkProtocol"
+                                       styleClass="buttonNonpersistent sessionEventTrigger" reRender="linkProtocolsRegion"
+                                       action="#{adminHome.addLinkProtocol}" oncomplete="onAjaxRequestComplete()">
+                            <h:outputText styleClass="buttonLabel" value="#{messages['lacewiki.button.Add']}"/>
+                        </a:commandLink>
+                    </div>
+                </div>
+            </s:div>
+
+            </a:region>
+            </s:div>
+        </div>
+
+        <div id="systemPrefs">
+            <div class="formFields">
+                <ui:include src="includes/preferencesEditor.xhtml">
+                    <ui:param name="tabId" value="systemPrefsTab"/>
+                    <ui:param name="preferenceEntities" value="#{systemPreferenceEntities}"/>
+                </ui:include>
+            </div>
+        </div>
+        
+        <div id="spamReport" style="padding: 20px">
+          <s:div id="spamReportContent">
+            <h:dataTable id="spamReportTable" var="report"
+                         value="#{spamReports}"
+                         rendered="#{spamReports.rowCount >0}"
+                         styleClass="datatable topLeftBottomBorder"
+                         headerClass="regularHeader rightBorder smallFont"
+                         columnClasses="tenPercentColumn rightBorder alignLeft,
+                                        defaultColumn rightBorder alignLeft wrapWhitespace,
+                                        tenPercentColumn rightBorder alignCenter"
+                         rowClasses="rowOdd,rowEven"
+                         cellpadding="0" cellspacing="0" border="0">
+
+                <h:column>
+                    <f:facet name="header">
+                        #{messages['lacewiki.label.adminHome.spamReport.Reporter']}
+                    </f:facet>
+
+                    <h:outputLink value="#{wikiURLRenderer.renderUserProfileURL(report.reporter)}">
+                        <h:outputText value="#{report.reporter.fullname}"/>
+                    </h:outputLink>                                        
+                </h:column>
+                <h:column>
+                    <f:facet name="header">
+                        #{messages['lacewiki.label.adminHome.spamReport.Comment']}
+                    </f:facet>                   
+                    
+                    <div style="padding: 4px">
+                      <h:outputLink value="#{wikiURLRenderer.renderURL(report.comment)}">
+                          <h:outputText value="#{report.comment.subject}"/>
+                      </h:outputLink>                     
+                      
+                      <s:div styleClass="commentText" rendered="#{report.comment.useWikiText and not empty report.comment.parent.areaNumber}">
+                          <s:formattedText value="#{report.comment.content}"
+                                              linkStyleClass="regularLink"
+                                              brokenLinkStyleClass="brokenLink"
+                                              attachmentLinkStyleClass="regularLink"
+                                              thumbnailLinkStyleClass="regularLink"
+                                              enableMacroRendering="false"/>
+                      </s:div>
+                      <s:div styleClass="commentText plaintext" rendered="#{not report.comment.useWikiText and report.comment.parent.name != report.comment.subject}" style="margin-top:15px;">
+                          <h:outputText value="#{wiki:escapeHTML(report.comment.content, true, true)}" escape="false"/>
+                      </s:div>
+                      <s:div styleClass="commentText plaintext" rendered="#{not report.comment.useWikiText and report.comment.parent.name == report.comment.subject}">
+                          <h:outputText value="#{wiki:escapeHTML(report.comment.content, true, true)}" escape="false"/>
+                      </s:div>       
+                      
+                      <div>
+                                              
+                        <s:fragment rendered="#{s:hasPermission('Comment', 'delete', report.comment)}">                        
+                            <ui:decorate template="includes/confirmationAction.xhtml">
+                                <ui:param name="label" value="#{messages['lacewiki.label.adminHome.spamReport.RemoveComment']}"/>
+                                <ui:param name="jsFunctionName" value="deleteCommentId#{report.comment.id}"/>
+                                <ui:param name="message" value="#{messages['lacewiki.label.AreYouSureYouWantToDelete']
+                                                                    .concat(' ')
+                                                                    .concat(messages['lacewiki.label.commentsDisplay.CommentThread'])
+                                                                    .concat(': \'')
+                                                                    .concat(report.comment.subject)
+                                                                    .concat('\'?')}"/>
+                                <ui:define name="jsFunction">
+                                    <a:jsFunction name="#{jsFunctionName}"
+                                                  reRender="spamReportContent"
+                                                  action="#{commentHome.remove(report.comment.id)}"
+                                                  oncomplete="onAjaxRequestComplete()"
+                                                  status="globalStatus"/>
+                                </ui:define>
+                            </ui:decorate>
+                        </s:fragment>
+                        
+                        
+                        <s:fragment rendered="#{s:hasPermission('Comment', 'delete', report.comment)}">                        
+                            <ui:decorate template="includes/confirmationAction.xhtml">
+                                <ui:param name="label" value="#{messages['lacewiki.label.adminHome.spamReport.NotSpam']}"/>
+                                <ui:param name="jsFunctionName" value="deleteReportId#{report.reportId}"/>
+                                <ui:param name="linkClass" value="buttonReport"/>
+                                <ui:param name="message" value="#{messages['lacewiki.label.adminHome.spamReport.AreYouSureYouWantToDelete']
+                                                                    .concat('?')}"/>
+                                <ui:define name="jsFunction">
+                                    <a:jsFunction name="#{jsFunctionName}"
+                                                  reRender="spamReportContent"
+                                                  action="#{adminHome.removeSpamReport(report.comment.id)}"
+                                                  oncomplete="onAjaxRequestComplete()"
+                                                  status="globalStatus"/>
+                                </ui:define>
+                            </ui:decorate>
+                        </s:fragment>                                              
+                        
+                      </div>        
+                   </div>
+                    
+                </h:column>
+                <h:column>
+                    <f:facet name="header">
+                        #{messages['lacewiki.label.adminHome.spamReport.Poster']}
+                    </f:facet>
+
+                    <s:div rendered="#{report.comment.ownedByRegularUser}">
+                        <s:span styleClass="undecoratedLink">
+                            <h:outputLink value="#{wikiURLRenderer.renderUserProfileURL(report.comment.createdBy)}">
+                                <h:outputText value="#{report.comment.createdBy.fullname}"/>
+                            </h:outputLink>
+                        </s:span>
+                    </s:div>
+
+                    <s:div rendered="#{not report.comment.ownedByRegularUser}">
+                        <h:outputText rendered="#{empty report.comment.fromUserHomepage}" value="#{report.comment.fromUserName}"/>
+                        <s:fragment rendered="#{not empty report.comment.fromUserHomepage}">
+                            <a href="#{report.comment.fromUserHomepage}">#{report.comment.fromUserName}</a>
+                        </s:fragment>
+                        <s:fragment rendered="#{not empty report.comment.fromUserEmail}">
+                            <h:outputText value="&#160;|&#160;"/>
+                                <h:outputLink value="#{wiki:escapeEmailURL(wiki:concat('mailto:', report.comment.fromUserEmail))}">
+                                <h:outputText value="#{wiki:escapeAtSymbol(report.comment.fromUserEmail)}"/>
+                            </h:outputLink>
+                        </s:fragment>
+                    </s:div>                                        
+                                                          
+                </h:column>                
+
+            </h:dataTable>
+          </s:div>
+        </div>
+        
+        <div id="blacklist" style="padding: 20px">
+          <s:div id="blacklistContent">
+            <h:dataTable id="blacklistTable" var="bl"
+                         value="#{blacklist}"
+                         rendered="#{blacklist.rowCount >0}"
+                         styleClass="datatable topLeftBottomBorder"
+                         headerClass="regularHeader rightBorder smallFont"
+                         columnClasses="tenPercentColumn rightBorder alignLeft,
+                                        defaultColumn rightBorder alignLeft wrapWhitespace,
+                                        tenPercentColumn rightBorder alignCenter"
+                         rowClasses="rowOdd,rowEven"
+                         cellpadding="0" cellspacing="0" border="0">
+
+                <h:column>
+                    <f:facet name="header">
+                        #{messages['lacewiki.label.adminHome.blacklist.IPAddress']}
+                    </f:facet>
+
+                    #{bl.ipAddress}                                       
+                </h:column>
+                <h:column>
+                    <f:facet name="header">
+                        #{messages['lacewiki.label.adminHome.blacklist.Email']}
+                    </f:facet>                   
+                    
+                    #{bl.email}
+                </h:column>
+                
+                <h:column>
+                    <f:facet name="header">
+                        #{messages['lacewiki.label.adminHome.blacklist.Action']}
+                    </f:facet>
+                                          
+                    <div style="padding:4px">
+                        <ui:decorate template="includes/confirmationAction.xhtml">
+                            <ui:param name="label" value="#{messages['lacewiki.label.adminHome.blacklist.Remove']}"/>
+                            <ui:param name="jsFunctionName" value="deleteBlacklistId#{bl.id}"/>
+                            <ui:param name="message" value="#{messages['lacewiki.label.adminHome.blacklist.AreYouSureYouWantToDelete']
+                                                                .concat('?')}"/>
+                            <ui:define name="jsFunction">
+                                <a:jsFunction name="#{jsFunctionName}"
+                                              reRender="blacklistContent"
+                                              action="#{adminHome.removeBlacklist(bl.id)}"
+                                              oncomplete="onAjaxRequestComplete()"
+                                              status="globalStatus"/>
+                            </ui:define>
+                        </ui:decorate>
+                    </div>        
+                    
+                </h:column>            
+
+            </h:dataTable>
+          </s:div>
+        </div>
+        
+
+    </div>
+
+    <div class="formControls wideLabels">
+
+        <div class="entry">
+            <div class="label">&#160;</div>
+            <div class="input">
+
+                <a:commandLink status="globalStatus" id="update"
+                               styleClass="button saveButton sessionEventTrigger" reRender="body"
+                               action="#{adminHome.update}"
+                               oncomplete="onAjaxRequestComplete()"
+                               tabindex="9"
+                               accesskey="#{messages['lacewiki.button.adminHome.SaveSettings.accesskey']}">
+                    <h:outputText escape="false" styleClass="buttonLabel" value="#{messages['lacewiki.button.adminHome.SaveSettings']}"/>
+                </a:commandLink>
+
+            </div>
+        </div>
+
+    </div>
+
+</div></h:form>
+
+</ui:define>
+
+<ui:define name="footer">&#160;</ui:define>
+
+</ui:composition>
+

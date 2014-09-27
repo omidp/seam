@@ -1,0 +1,287 @@
+<assembly
+   xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/2.2"
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/2.2 http://maven.apache.org/xsd/assembly-2.2.xsd">
+
+   <id>distribution</id>
+   <formats>
+<!--        <format>dir</format> -->
+       <format>zip</format>
+       <format>tar.gz</format>
+   </formats>
+   <includeBaseDirectory>false</includeBaseDirectory>
+  
+   
+   <!-- Add distribution files -->
+   <fileSets>
+   
+      <!--  All module sources defined in dependencies except examples -->
+      <fileSet>
+        <directory>target/dependency</directory>
+        <outputDirectory>src</outputDirectory>
+        <excludes>
+            <exclude>examples/</exclude>
+        </excludes>
+      </fileSet>
+      
+      <!-- Examples only -->
+      <fileSet>
+        <directory>target/dependency</directory>
+        <outputDirectory>.</outputDirectory>
+        <includes>
+            <include>examples/</include>
+        </includes>
+        <excludes>
+            <exclude>examples/wiki/</exclude>
+        </excludes>
+      </fileSet>
+      
+      <!-- Distribution related files -->
+      <fileSet>
+         <directory>src/main/assembly</directory>
+         <outputDirectory>.</outputDirectory>
+         <includes>
+            <include>readme.txt</include>
+            <include>lgpl.txt</include>
+            <include>copyright.txt</include>
+            <include>changelog.txt</include>
+            <include>seam21migration.txt</include>
+            <include>seam2migration.txt</include>
+            <include>clustering-howto.txt</include>
+            <include>seam</include>
+            <include>seam.bat</include>
+         </includes>
+      </fileSet>
+      <fileSet>
+      	<directory>../extras</directory>
+      	<outputDirectory>extras</outputDirectory>
+      	<includes>
+      		<include>mail-ra.rar</include>
+      		<include>jsUnit/**</include>
+      		<include>readme.txt</include>
+      	</includes>
+      </fileSet>
+      <fileSet>
+        <directory>../jboss-seam/target</directory>
+        <outputDirectory>lib/interop</outputDirectory>
+        <includes>
+            <include>jboss-seam-wls-compatible.jar</include>
+        </includes>
+      </fileSet>
+      <fileSet>
+        <directory>../jboss-seam/target</directory>
+        <outputDirectory>lib/interop/src</outputDirectory>
+        <includes>
+            <include>jboss-seam-wls-compatible-sources.jar</include>
+        </includes>
+      </fileSet>
+      <!--  all jars from jboss-seam module dependencies 
+       (done this way due needs to have all scopes except test there) -->
+      <fileSet>
+        <directory>../jar-dependencies</directory>
+        <outputDirectory>./lib</outputDirectory>
+        <includes>
+            <include>*.jar</include>
+        </includes>
+      </fileSet>
+   </fileSets>    
+
+   <dependencySets>
+   
+   <!-- some extra things Embedded bootstrap, extras etc. -->
+   	<dependencySet>
+   		<outputDirectory>.</outputDirectory>
+   		<useProjectArtifact>false</useProjectArtifact>
+   		<includes>
+   			<include>org.jboss.seam:jboss-embedded-bootstrap</include>
+   		</includes>
+   		<unpack>true</unpack>
+   		<unpackOptions>   		
+   			<excludes>
+   				<exclude>META-INF/**</exclude>
+   				<exclude>.settings/</exclude>
+   				<exclude>**/.settings/</exclude>
+   				<exclude>.gitignore</exclude>
+   				<exclude>.project</exclude>
+   				<exclude>.classpath</exclude>
+   				<exclude>**/.project</exclude>
+                <exclude>**/.classpath</exclude>
+   			</excludes>
+   		</unpackOptions>
+   		<outputFileNameMapping>${artifact.artifactId}</outputFileNameMapping>
+   	</dependencySet>
+   	
+   <!-- Add necessary sources jars -->
+      <dependencySet>
+         <outputDirectory>lib/src</outputDirectory>
+         <useProjectArtifact>false</useProjectArtifact>
+         <useStrictFiltering>true</useStrictFiltering>
+         <includes>
+            <include>org.jboss.seam:*:*:sources</include>
+         </includes>
+         <excludes>
+            <exclude>org.jboss.seam:jboss-seam-gen:*:sources</exclude>
+            <exclude>org.jboss.seam:jboss-seam-jul:*:sources</exclude>
+         </excludes>
+         <outputFileNameMapping>${artifact.artifactId}-sources.${artifact.extension}</outputFileNameMapping>
+      </dependencySet>
+      
+    <!-- Add jboss-seam jars into lib folder -->
+      <dependencySet>
+         <outputDirectory>lib</outputDirectory>
+         <useProjectArtifact>false</useProjectArtifact>                  
+         <useStrictFiltering>true</useStrictFiltering>         
+         <includes>
+            <include>org.jboss.seam:jboss-seam:ejb</include>
+            <include>org.jboss.seam:jboss-seam-debug:jar</include>
+            <include>org.jboss.seam:jboss-seam-ui:jar</include>
+            <include>org.jboss.seam:jboss-seam-excel:jar</include>
+            <include>org.jboss.seam:jboss-seam-pdf:jar</include>
+            <include>org.jboss.seam:jboss-seam-mail:jar</include>
+            <include>org.jboss.seam:jboss-seam-rss:jar</include>
+            <include>org.jboss.seam:jboss-seam-resteasy:jar</include>
+            <include>org.jboss.seam:jboss-seam-wicket:jar</include>
+            <include>org.jboss.seam:jboss-seam-remoting:jar</include>
+            <include>org.jboss.seam:jboss-seam-flex:jar</include>
+            <include>org.jboss.seam:jboss-seam-ioc:jar</include>
+            <include>org.jboss.seam.embedded:jboss-embedded-api:jar</include>
+         </includes>
+         <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
+      </dependencySet>
+      
+      <!-- Seam jul -->
+      <dependencySet>
+         <outputDirectory>lib/interop</outputDirectory>
+         <useProjectArtifact>false</useProjectArtifact>
+         <useStrictFiltering>true</useStrictFiltering>
+         <includes>
+            <include>org.jboss.seam:jboss-seam-jul:jar</include>
+         </includes>
+         <excludes>
+            <exclude>org.jboss.seam:jboss-seam-jul:jar:sources</exclude>
+         </excludes>
+         <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
+      </dependencySet>
+      
+      <!-- Seam jul sources -->
+      <dependencySet>
+         <outputDirectory>lib/interop/src</outputDirectory>
+         <useProjectArtifact>false</useProjectArtifact>
+         <useStrictFiltering>true</useStrictFiltering>
+         <includes>
+            <include>org.jboss.seam:jboss-seam-jul:jar:sources</include>
+         </includes>
+         <outputFileNameMapping>${artifact.artifactId}-sources.${artifact.extension}</outputFileNameMapping>
+      </dependencySet>
+          
+	  <!-- Seam gen -->
+      <dependencySet>
+         <outputDirectory>lib/gen</outputDirectory>
+         <useProjectArtifact>false</useProjectArtifact>
+         <useStrictFiltering>true</useStrictFiltering>
+         <useTransitiveDependencies>true</useTransitiveDependencies>
+         <includes>
+            <include>org.jboss.seam:jboss-seam-gen:jar</include>
+            <include>org.hibernate:hibernate-tools:jar</include>
+            <include>org.beanshell:bsh:jar</include>
+            <include>org.hibernate:jtidy:jar</include>
+            <include>freemarker:freemarker:jar</include>
+            <include>org.eclipse.core:runtime:jar</include>
+            <include>org.eclipse.equinox:common:jar</include>
+            <include>org.eclipse:text:jar</include>
+            <include>org.richfaces.samples:darkX:jar</include>
+            <include>org.richfaces.samples:laguna:jar</include>
+            <include>org.richfaces.samples:glassX:jar</include>
+            <include>org.apache.ant:ant:jar</include>
+            <include>org.apache.ant:ant-launcher:jar</include>
+            <include>org.apache.ant:ant-nodeps:jar</include>
+         </includes>
+         <excludes>
+            <exclude>org.jboss.seam:jboss-seam-gen:jar:sources</exclude>
+         </excludes>
+         <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
+      </dependencySet>
+      
+      <dependencySet>
+         <outputDirectory>lib/gen/src</outputDirectory>
+         <useProjectArtifact>false</useProjectArtifact>
+         <includes>
+            <include>org.jboss.seam:jboss-seam-gen:*:sources</include>
+         </includes>
+         <outputFileNameMapping>${artifact.artifactId}-${artifact.classifier}.${artifact.extension}</outputFileNameMapping>
+      </dependencySet>
+      
+      <dependencySet>
+         <outputDirectory>./seam-gen</outputDirectory>
+         <useProjectArtifact>false</useProjectArtifact>
+         <unpack>true</unpack>
+         <unpackOptions>
+            <excludes>
+                <exclude>**/.gitignore</exclude>
+            </excludes>
+         </unpackOptions>
+         <includes>
+            <include>org.jboss.seam:jboss-seam-gen:zip:distribution</include>
+         </includes>
+      </dependencySet>
+      
+      <dependencySet>
+         <outputDirectory>lib/test</outputDirectory>
+         <useProjectArtifact>false</useProjectArtifact>
+         <includes>
+            <include>org.jboss.seam.embedded:hibernate-all:*</include>
+            <include>org.jboss.seam.embedded:jboss-embedded-all:*</include>
+            <include>org.jboss.seam.embedded:thirdparty-all:*</include>
+         </includes>
+         <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
+      </dependencySet>
+      
+      <!-- Pull in docbook artifacts -->
+      <dependencySet>
+         <outputDirectory>doc/reference/</outputDirectory>
+         <unpack>true</unpack>
+         <useProjectArtifact>false</useProjectArtifact>
+         <includes>
+            <include>org.jboss.seam:seam-reference-guide</include>
+         </includes>
+         <unpackOptions>
+            <excludes>
+               <exclude>META-INF/</exclude>
+            </excludes>
+         </unpackOptions>
+         <outputFileNameMapping>${artifact.artifactId}-${artifact.version}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
+      </dependencySet>
+      
+      <!-- Add necessary javadoc jars -->
+      <dependencySet>
+         <outputDirectory>doc/api</outputDirectory>
+         <useProjectArtifact>false</useProjectArtifact>
+         <unpack>true</unpack>
+         <unpackOptions>
+            <excludes>
+               <exclude>META-INF/</exclude>
+            </excludes>
+         </unpackOptions>
+         <includes>
+            <include>org.jboss.seam:jboss-seam:*:javadoc</include>
+         </includes>
+         <outputFileNameMapping>${artifact.artifactId}-${artifact.version}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
+      </dependencySet>
+
+      <dependencySet>
+         <outputDirectory>doc/ui/apidocs</outputDirectory>
+         <useProjectArtifact>false</useProjectArtifact>
+         <unpack>true</unpack>
+         <unpackOptions>
+			 <excludes>
+				<exclude>META-INF/</exclude>
+			 </excludes>
+		 </unpackOptions>
+         <includes>
+            <include>org.jboss.seam:jboss-seam-ui:*:javadoc</include>
+         </includes>
+         <outputFileNameMapping>${artifact.artifactId}-${artifact.version}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
+      </dependencySet>
+
+   </dependencySets>
+</assembly>

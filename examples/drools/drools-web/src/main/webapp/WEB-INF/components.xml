@@ -1,0 +1,35 @@
+<components xmlns="http://jboss.com/products/seam/components" 
+            xmlns:core="http://jboss.com/products/seam/core"
+            xmlns:drools="http://jboss.com/products/seam/drools"
+            xmlns:bpm="http://jboss.com/products/seam/bpm"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation=
+                "http://jboss.com/products/seam/drools http://jboss.com/products/seam/drools-2.3.xsd 
+                 http://jboss.com/products/seam/core http://jboss.com/products/seam/core-2.3.xsd 
+                 http://jboss.com/products/seam/components http://jboss.com/products/seam/components-2.3.xsd 
+                 http://jboss.com/products/seam/bpm http://jboss.com/products/seam/bpm-2.3.xsd">
+            
+    <drools:rule-base name="ruleBase" rule-files="numberguess.drl"/>
+    <!-- use this in order to load from decision table instead -->        
+    <!-- <drools:rule-base name="ruleBase" rule-files="numberguess.xls"/> -->
+    <!--  use this in order to load from a drl and also add a ruleflow -->
+    <!-- <drools:rule-base name="ruleBase" rule-files="numberguessforflow.drl, numberguess.rf"/>  -->
+    <!--  use this in order to load from a xls and also add a ruleflow -->
+    <!-- <drools:rule-base name="ruleBase" rule-files="numberguessforflow.xls, numberguess.rf"/> -->     
+    <!--  use this if you want to register a custom consequence exception handler -->
+    <!--  <drools:rule-base name="ruleBase" rule-files="numberguess.xls" consequence-exception-handler="#{gameConsequenceExceptionHandler}"/>  -->
+    <drools:managed-working-memory name="workingMemory" rule-base="#{ruleBase}">
+    	<!--  add WM event listeners -->
+    	<!-- <drools:event-listeners>
+           <value>org.drools.event.DebugWorkingMemoryEventListener</value>
+           <value>org.drools.event.DebugAgendaEventListener</value>
+        </drools:event-listeners>  -->
+    </drools:managed-working-memory>
+    
+    <bpm:jbpm>
+        <bpm:pageflow-definitions>
+            <value>pageflow.jpdl.xml</value>
+        </bpm:pageflow-definitions>
+    </bpm:jbpm>
+
+</components>

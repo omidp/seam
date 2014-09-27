@@ -1,0 +1,21 @@
+<components xmlns="http://jboss.com/products/seam/components"
+            xmlns:core="http://jboss.com/products/seam/core"
+            xmlns:async="http://jboss.com/products/seam/async"
+            xmlns:mail="http://jboss.com/products/seam/mail"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation=
+                "http://jboss.com/products/seam/core http://jboss.com/products/seam/core-2.3.xsd 
+                 http://jboss.com/products/seam/async http://jboss.com/products/seam/async-2.3.xsd
+                 http://jboss.com/products/seam/mail http://jboss.com/products/seam/mail-2.3.xsd
+                 http://jboss.com/products/seam/components http://jboss.com/products/seam/components-2.3.xsd">
+
+
+    <core:init debug="true" jndi-pattern="@jndiPattern@" />
+        
+     <!-- If you need to alter the SMTP gateway, comment out this mail-session, -->
+     <!--<mail:mail-session host="localhost" port="2525" /> -->
+    
+    <!-- uncomment this one and set the host attribute to the name or IP address of your SMTP gateway-->
+    <mail:mail-session host="localhost" tls="false" port="3025" ssl="false" />    
+	
+</components>

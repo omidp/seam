@@ -1,0 +1,52 @@
+package org.jboss.seam.example.numberguess
+
+import org.jboss.seam.drools.Decision;
+import java.lang.Integer;
+
+global Decision decision
+global Integer randomNumber
+global Game game
+
+rule High
+   ruleflow-group "Guess"	
+   when 
+      Guess(guess: value>randomNumber)
+   then 
+      game.setBiggest(guess-1);
+end
+
+rule Low
+   ruleflow-group "Guess"
+   when
+      Guess(guess: value<randomNumber)
+   then 
+      game.setSmallest(guess+1);
+end
+
+rule Win
+   ruleflow-group "Decision"
+   when 
+      Guess(value==randomNumber)
+   then 
+      decision.setOutcome("win");
+end
+
+rule Lose
+   ruleflow-group "Decision"
+   when 
+      Game(guessCount==9)
+   then
+      if ( decision.getOutcome()==null )
+      {
+         decision.setOutcome("lose");
+      }
+end
+
+rule Increment
+   ruleflow-group "Increment"
+   salience -10
+   when
+      Guess()
+   then
+      game.incrementGuessCount();
+end

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>org.jboss.seam.examples</groupId>
+    <artifactId>nestedbooking</artifactId>
+    <parent>
+        <groupId>org.jboss.seam</groupId>
+        <artifactId>examples</artifactId>
+        <version>2.2.3</version>
+    </parent>
+    <packaging>pom</packaging>
+    <name>Nested Booking Example</name>
+    
+    <properties>
+        <example.name>nestedbooking</example.name>
+    </properties>
+    
+    <modules>
+        <module>nestedbooking-ear</module>
+        <module>nestedbooking-ejb</module>
+        <module>nestedbooking-web</module>
+        <module>nestedbooking-tests</module>
+    </modules>
+    
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.jboss.seam.examples</groupId>
+                <artifactId>nestedbooking-ejb</artifactId>
+                <version>${project.version}</version>
+                <type>ejb</type>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.seam.examples</groupId>
+                <artifactId>nestedbooking-web</artifactId>
+                <version>${project.version}</version>
+                <type>war</type>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.seam.examples</groupId>
+                <artifactId>nestedbooking-ear</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+</project>

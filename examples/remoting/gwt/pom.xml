@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <parent>
+        <artifactId>examples</artifactId>
+        <groupId>org.jboss.seam</groupId>
+        <version>2.2.3</version>
+        <relativePath>../../pom.xml</relativePath>
+    </parent>
+    
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>org.jboss.seam.examples.remoting</groupId>
+    <artifactId>gwt</artifactId>
+    <packaging>pom</packaging>
+    <name>Gwt Example</name>
+  
+    <modules>
+        <module>gwt-ejb</module>
+        <module>gwt-web</module>
+        <module>gwt-ear</module>
+        <module>gwt-tests</module>
+    </modules>
+
+    <properties>
+        <example.name>gwt</example.name>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.jboss.seam.examples.remoting</groupId>
+                <artifactId>gwt-ejb</artifactId>
+                <version>${project.version}</version>
+                <type>ejb</type>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.seam.examples.remoting</groupId>
+                <artifactId>gwt-web</artifactId>
+                <version>${project.version}</version>
+                <type>war</type>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.seam.examples.remoting</groupId>
+                <artifactId>gwt-ear</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+    
+</project>
