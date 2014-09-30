@@ -9,8 +9,8 @@ package org.jboss.seam.test.unit;
 import java.io.Serializable;
 
 import javax.ejb.Remove;
+import javax.validation.constraints.NotNull;
 
-import org.hibernate.validator.NotNull;
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.Begin;
 import org.jboss.seam.annotations.End;

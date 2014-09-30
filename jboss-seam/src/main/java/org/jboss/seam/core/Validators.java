@@ -4,9 +4,7 @@ import static org.jboss.seam.annotations.Install.BUILT_IN;
 
 import java.beans.FeatureDescriptor;
 import java.util.Iterator;
-import java.util.Locale;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Set;
 
 import javax.el.ELContext;
 import javax.el.ELException;
@@ -14,9 +12,8 @@ import javax.el.ELResolver;
 import javax.el.PropertyNotFoundException;
 import javax.el.PropertyNotWritableException;
 import javax.el.ValueExpression;
+import javax.validation.ConstraintViolation;
 
-import org.hibernate.validator.ClassValidator;
-import org.hibernate.validator.InvalidValue;
 import org.jboss.seam.Component;
 import org.jboss.seam.Instance;
 import org.jboss.seam.ScopeType;
@@ -36,42 +33,11 @@ import org.jboss.seam.el.EL;
 @Name("org.jboss.seam.core.validators")
 @BypassInterceptors
 @Scope(ScopeType.APPLICATION)
-@Install(precedence = BUILT_IN, classDependencies = "org.hibernate.validator.ClassValidator")
+@Install(precedence = BUILT_IN, classDependencies = "org.jboss.seam.core.ClassValidator")
 public class Validators
 {
 
-   // TODO: should use weak references here...
-   private Map<Key, ClassValidator> classValidators = new ConcurrentHashMap<Key, ClassValidator>();
-
-   class Key
-   {
-      private Class validatableClass;
-      private java.util.Locale locale;
-
-      public Key(Class validatableClass, java.util.Locale locale)
-      {
-         this.validatableClass = validatableClass;
-         this.locale = locale;
-      }
-
-      @Override
-      public boolean equals(Object other)
-      {
-         if (other == null || !(other instanceof Key)) {
-             return false;             
-         }
-         
-         Key key = (Key) other;
-         return key.validatableClass.equals(validatableClass) && key.locale.equals(locale);
-      }
-
-      @Override
-      public int hashCode()
-      {
-         return validatableClass.hashCode() + locale.hashCode();
-      }
-   }
-
+  
    /**
     * Get the cached ClassValidator instance. If the argument is an instance of
     * a session bean Seam component instance, the returned validator will be
@@ -80,9 +46,10 @@ public class Validators
     * 
     * @param model the object to be validated
     */
+   @SuppressWarnings("unchecked")
    public <T> ClassValidator<T> getValidator(T model)
    {
-      Class modelClass = model instanceof Instance ? ((Instance) model).getComponent().getBeanClass() : model.getClass();
+      Class<?> modelClass = model instanceof Instance ? ((Instance) model).getComponent().getBeanClass() : model.getClass();
       return getValidator((Class<T>) modelClass);
    }
 
@@ -91,19 +58,9 @@ public class Validators
     * 
     * @param modelClass the class to be validated
     */
-   @SuppressWarnings("unchecked")
    public <T> ClassValidator<T> getValidator(Class<T> modelClass)
    {
-      java.util.ResourceBundle bundle = SeamResourceBundle.getBundle();
-      Locale none = bundle == null ? new Locale("NONE") : bundle.getLocale();
-      Key key = new Key(modelClass, none);
-      ClassValidator result = classValidators.get(key);
-      if (result == null)
-      {
-         result = createValidator(modelClass);
-         classValidators.put(key, result);
-      }
-      return result;
+      return createValidator(modelClass);
    }
 
    /**
@@ -112,12 +69,9 @@ public class Validators
     * 
     * @param modelClass the class to be validated
     */
-   @SuppressWarnings("unchecked")
    protected <T> ClassValidator<T> createValidator(Class<T> modelClass)
    {
-      java.util.ResourceBundle bundle = SeamResourceBundle.getBundle();
-
-      return bundle == null ? new ClassValidator(modelClass) : new ClassValidator(modelClass, bundle);
+      return new ClassValidator<T>(modelClass);
    }
 
    /**
@@ -129,7 +83,7 @@ public class Validators
     * @param value a value to be assigned to the property
     * @return a set of potential InvalidValues, from Hibernate Validator
     */
-   public InvalidValue[] validate(ValueExpression valueExpression, ELContext elContext, Object value)
+   public Set<ConstraintViolation<Object>> validate(ValueExpression valueExpression, ELContext elContext, Object value)
    {
       ValidatingResolver validatingResolver = new ValidatingResolver(elContext.getELResolver());
       ELContext decoratedContext = EL.createELContext(elContext, validatingResolver);
@@ -140,14 +94,14 @@ public class Validators
    class ValidatingResolver extends ELResolver
    {
       private ELResolver delegate;
-      private InvalidValue[] invalidValues;
+      private Set<ConstraintViolation<Object>> invalidValues;
 
       public ValidatingResolver(ELResolver delegate)
       {
          this.delegate = delegate;
       }
 
-      public InvalidValue[] getInvalidValues()
+      public Set<ConstraintViolation<Object>> getInvalidValues()
       {
          return invalidValues;
       }

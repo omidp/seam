@@ -8,7 +8,7 @@ import javax.faces.convert.IntegerConverter;
 import javax.faces.validator.Validator;
 import javax.faces.validator.ValidatorException;
 
-import org.hibernate.validator.Length;
+import org.hibernate.validator.constraints.Length;
 import org.jboss.seam.contexts.Contexts;
 import org.jboss.seam.core.Expressions;
 import org.jboss.seam.core.Validators;

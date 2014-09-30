@@ -36,8 +36,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 import javax.servlet.http.HttpSession;
 import javax.transaction.UserTransaction;
+import javax.validation.ConstraintViolation;
 
-import org.hibernate.validator.InvalidValue;
 import org.jboss.seam.Component;
 import org.jboss.seam.Seam;
 import org.jboss.seam.contexts.Contexts;
@@ -445,12 +445,13 @@ public class AbstractSeamTest
       protected boolean validateValue(String valueExpression, Object value)
       {
          ValueExpression ve = application.getExpressionFactory().createValueExpression(facesContext.getELContext(), valueExpression, Object.class);
-         InvalidValue[] ivs = Validators.instance().validate(ve, facesContext.getELContext(), value);
-         if (ivs.length > 0)
+         Set<ConstraintViolation<Object>> ivs = Validators.instance().validate(ve, facesContext.getELContext(), value);
+         if (ivs.size() > 0)
          {
-            validationFailed = true;
-            facesContext.addMessage(null, FacesMessages.createFacesMessage(FacesMessage.SEVERITY_ERROR, ivs[0].getMessage()));
-            return false;
+             validationFailed = true;
+             String message = ivs.iterator().next().getMessage();
+             facesContext.addMessage(null, FacesMessages.createFacesMessage(FacesMessage.SEVERITY_ERROR, message));
+             return false;
          }
          else
          {

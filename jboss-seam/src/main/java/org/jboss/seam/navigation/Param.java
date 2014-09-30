@@ -2,6 +2,7 @@ package org.jboss.seam.navigation;
 
 import java.util.Date;
 import java.util.Map;
+import java.util.Set;
 
 import javax.el.ELContext;
 import javax.el.ELException;
@@ -10,11 +11,12 @@ import javax.faces.context.FacesContext;
 import javax.faces.convert.Converter;
 import javax.faces.validator.Validator;
 import javax.faces.validator.ValidatorException;
+import javax.validation.ConstraintViolation;
 
-import org.hibernate.validator.InvalidValue;
+
 import org.jboss.seam.contexts.Contexts;
-import org.jboss.seam.core.Validators;
 import org.jboss.seam.core.Expressions.ValueExpression;
+import org.jboss.seam.core.Validators;
 import org.jboss.seam.faces.FacesMessages;
 import org.jboss.seam.log.LogProvider;
 import org.jboss.seam.log.Logging;
@@ -254,7 +256,7 @@ public final class Param
       {
          //TODO: note that this code is duplicated from ModelValidator!!
          ELContext elContext = facesContext.getELContext();
-         InvalidValue[] invalidValues;
+         Set<ConstraintViolation<Object>> invalidValues; 
          try
          {
             invalidValues = Validators.instance().validate( valueExpression.toUnifiedValueExpression(), elContext, value );
@@ -266,21 +268,17 @@ public final class Param
             throw new ValidatorException( createMessage(cause), cause );
          }
          
-         if ( invalidValues.length>0 )
+         if ( invalidValues.size()>0 )
          {
             throw new ValidatorException( createMessage(invalidValues) );
          }
       }
    }
 
-   private FacesMessage createMessage(InvalidValue[] invalidValues)
+   private FacesMessage createMessage(Set<ConstraintViolation<Object>> invalidValues)
    {
-      return FacesMessages.createFacesMessage(
-            FacesMessage.SEVERITY_ERROR,
-            INVALID_MESSAGE_ID,
-            "'" + name + "' parameter is invalid: " + invalidValues[0].getMessage(),
-            new Object[] { invalidValues[0], name }
-      );
+      String message = invalidValues.iterator().next().getMessage();
+      return FacesMessages.createFacesMessage(FacesMessage.SEVERITY_ERROR, INVALID_MESSAGE_ID, "'" + name + "' parameter is invalid: " + message, new Object[] { message, name });
    }
 
    private FacesMessage createMessage(Throwable cause)

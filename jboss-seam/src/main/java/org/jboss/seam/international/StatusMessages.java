@@ -8,8 +8,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
-import org.hibernate.validator.InvalidValue;
+import javax.validation.ConstraintViolation;
+
 import org.jboss.seam.Component;
 import org.jboss.seam.international.StatusMessage.Severity;
 
@@ -305,11 +307,11 @@ public abstract class StatusMessages implements Serializable
     * Add an array of InvalidValues from Hibernate Validator. Each message will
     * be added with a severity of WARN.
     */
-   public void add(InvalidValue[] ivs)
+   public void add(Set<ConstraintViolation<Object>> constraintViolations)
    {
-      for (InvalidValue iv: ivs)
+      for (ConstraintViolation<Object> constraintViolation: constraintViolations)
       {
-         add(iv);
+         add(constraintViolation);
       }
    }
 
@@ -319,11 +321,11 @@ public abstract class StatusMessages implements Serializable
     * 
     * The name of the property that was validated will be used as the widget ID
     */
-   public void addToControls(InvalidValue[] ivs)
+   public void addToControls(Set<ConstraintViolation<Object>> constraintViolations)
    {
-      for (InvalidValue iv: ivs)
+      for (ConstraintViolation<Object> constraintViolation: constraintViolations)
       {
-         addToControl(iv);
+         addToControl(constraintViolation);
       }
    }
 
@@ -331,9 +333,9 @@ public abstract class StatusMessages implements Serializable
     * Add an InvalidValue from Hibernate Validator. The message will
     * be added with a severity of WARN.
     */
-   public void add(InvalidValue iv)
+   public void add(ConstraintViolation<Object> constraintViolation)
    {
-      add( WARN, iv.getMessage() );
+      add( WARN, constraintViolation.getMessage() );
    }
 
    /**
@@ -342,9 +344,9 @@ public abstract class StatusMessages implements Serializable
     * 
     * The name of the property that was validated will be used as the widget ID
     */
-   public void addToControl(InvalidValue iv)
+   public void addToControl(ConstraintViolation<Object> constraintViolation)
    {
-      addToControl( iv.getPropertyName(), iv );
+      addToControl( constraintViolation.getInvalidValue().toString(),  constraintViolation);
    }
 
    /**
@@ -353,9 +355,9 @@ public abstract class StatusMessages implements Serializable
     * 
     * You can also specify the id of the widget to add the message to
     */
-   public void addToControl(String id, InvalidValue iv)
+   public void addToControl(String id, ConstraintViolation<Object> constraintViolation)
    {
-      addToControl( id, WARN, iv.getMessage() );
+      addToControl( id, WARN, constraintViolation.getMessage() );
    }
    
    private List<Runnable> getTasks()
