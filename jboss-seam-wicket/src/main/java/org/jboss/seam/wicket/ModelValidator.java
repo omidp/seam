@@ -1,13 +1,15 @@
 package org.jboss.seam.wicket;
 
+import java.util.Set;
+
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.validation.IValidatable;
 import org.apache.wicket.validation.IValidationError;
 import org.apache.wicket.validation.IValidator;
 import org.apache.wicket.validation.ValidationError;
-import org.hibernate.validator.ClassValidator;
-import org.hibernate.validator.InvalidValue;
+import org.jboss.seam.core.ClassValidator;
 import org.jboss.seam.core.Validators;
+import javax.validation.ConstraintViolation;
 
 
 /**
@@ -20,7 +22,7 @@ import org.jboss.seam.core.Validators;
 public class ModelValidator implements IValidator
 {
 
-   private Class clazz;
+   private Class<?> clazz;
    private String property;
 
    /**
@@ -47,11 +49,13 @@ public class ModelValidator implements IValidator
     */
    public void validate(IValidatable validatable)
    {
-      ClassValidator classValidator = Validators.instance().getValidator(clazz);
-      InvalidValue[] invalidValues = classValidator.getPotentialInvalidValues(property, validatable.getValue());
-      if (invalidValues.length > 0)
+      ClassValidator<?> classValidator = Validators.instance().getValidator(clazz);
+      Set<?> invalidValues = classValidator.getPotentialInvalidValues(property, validatable.getValue());
+      
+      if (invalidValues.size() > 0)
       {
-         String message = invalidValues[0].getMessage();
+         ConstraintViolation constraintViolation = (ConstraintViolation) invalidValues.iterator().next();
+         String message =   constraintViolation.getMessage();
          IValidationError validationError = new ValidationError().setMessage(message);
          validatable.error(validationError);
       }
