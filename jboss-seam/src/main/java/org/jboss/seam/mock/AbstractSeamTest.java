@@ -79,6 +79,8 @@ public class AbstractSeamTest
    private Map<String, Map> conversationViewRootAttributes;
    protected Filter seamFilter;
    
+   private static ServletContext realServletContext = null;
+   
    static 
    {
       phases = new SeamPhaseListener();
@@ -118,6 +120,11 @@ public class AbstractSeamTest
       return Manager.instance().isLongRunningConversation();
    }
 
+   protected String getConversationIdParameter()
+   {
+      return "conversationId";
+   }
+   
    /**
     * Search in all contexts
     */
@@ -448,10 +455,10 @@ public class AbstractSeamTest
          Set<ConstraintViolation<Object>> ivs = Validators.instance().validate(ve, facesContext.getELContext(), value);
          if (ivs.size() > 0)
          {
-             validationFailed = true;
-             String message = ivs.iterator().next().getMessage();
-             facesContext.addMessage(null, FacesMessages.createFacesMessage(FacesMessage.SEVERITY_ERROR, message));
-             return false;
+            validationFailed = true;
+            String message = ivs.iterator().next().getMessage();
+            facesContext.addMessage(null, FacesMessages.createFacesMessage(FacesMessage.SEVERITY_ERROR, message));
+            return false;
          }
          else
          {
@@ -729,6 +736,10 @@ public class AbstractSeamTest
 
       private void restoreViewPhase()
       {
+         if (conversationId != null)
+         {
+            setParameter(getConversationIdParameter(), conversationId);
+         }
          phases.beforePhase(new PhaseEvent(facesContext, PhaseId.RESTORE_VIEW, MockLifecycle.INSTANCE));
          try
          {
@@ -923,19 +934,38 @@ public class AbstractSeamTest
     */
    protected void startSeam() throws Exception
    {
-      startJbossEmbeddedIfNecessary();
-      this.servletContext = createServletContext();
+      if (realServletContext == null && MockSeamListener.getServletContext() != null) {
+         realServletContext = MockSeamListener.getServletContext();
+      }
+
+      // If the Seam Filter is already initialized, we can grab the real servlet context
+      if (realServletContext == null && ServletLifecycle.getServletContext() != null) {
+         realServletContext = ServletLifecycle.getServletContext();
+      }
+
+      ServletContext realContext = realServletContext;
+      this.servletContext = createServletContext(realContext);
       ServletLifecycle.beginApplication(servletContext);
       FactoryFinder.setFactory(FactoryFinder.APPLICATION_FACTORY, MockApplicationFactory.class.getName());
       new Initialization(servletContext).create().init();
       ((Init) servletContext.getAttribute(Seam.getComponentName(Init.class))).setDebug(false);
    }
    
-   protected ServletContext createServletContext()
+   protected ServletContext createServletContext(ServletContext realContext)
    {
-      MockServletContext mockServletContext = new MockServletContext();
-      initServletContext(mockServletContext.getInitParameters());
-      return mockServletContext;
+     if (realContext != null)
+     {
+        ServletContextWrapper wrappedServletContext = new ServletContextWrapper(realContext);
+        // TODO: 
+        //initServletContext(wrappedServletContext.getInitParameters());
+        return wrappedServletContext;
+     }
+     else
+     {
+        MockServletContext mockServletContext = new MockServletContext();
+        initServletContext(mockServletContext.getInitParameters());
+        return mockServletContext;
+     }
    }
    
    /**
@@ -957,7 +987,11 @@ public class AbstractSeamTest
    protected void setupClass() throws Exception
    {
       servletContext = ServletLifecycle.getServletContext();
+      
+      // FactoryFinder cannot be reliably used, as something could have called getFactory sooner
       applicationFactory = (ApplicationFactory) FactoryFinder.getFactory(FactoryFinder.APPLICATION_FACTORY);
+      //applicationFactory = new MockApplicationFactory();
+      
       application = applicationFactory.getApplication();
       conversationViewRootAttributes = new HashMap<String, Map>();
       seamFilter = createSeamFilter();
@@ -977,7 +1011,7 @@ public class AbstractSeamTest
    {
       seamFilter.destroy();
       conversationViewRootAttributes = null;
-      applicationFactory.setApplication(null);
+      // applicationFactory.setApplication(null);
    }
 
    protected Filter createSeamFilter() throws ServletException
@@ -1027,29 +1061,6 @@ public class AbstractSeamTest
    }
 
    private static boolean started;
-
-   protected void startJbossEmbeddedIfNecessary() throws Exception
-   {
-      if (!started && embeddedJBossAvailable())
-      {
-         new EmbeddedBootstrap().startAndDeployResources();
-      }
-
-      started = true;
-   }
-
-   private boolean embeddedJBossAvailable()
-   {
-      try
-      {
-         Class.forName("org.jboss.embedded.Bootstrap");
-         return true;
-      }
-      catch (ClassNotFoundException e)
-      {
-         return false;
-      }
-   }
 
    protected ELResolver[] getELResolvers()
    {

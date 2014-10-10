@@ -11,14 +11,7 @@ import org.testng.annotations.Test;
 public class NamespaceTest 
     extends SeamTest 
 {
-    @Override
-    protected void startJbossEmbeddedIfNecessary() 
-          throws org.jboss.deployers.spi.DeploymentException,
-                 java.io.IOException 
-    {
-       // don't deploy   
-    }
-    
+  
     
     @Test
     public void nameSpaceComponent() 

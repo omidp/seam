@@ -6,10 +6,7 @@ import org.testng.annotations.Test;
 public class SeamTestTest extends SeamTest
 {
    
-   @Override
-   protected void startJbossEmbeddedIfNecessary() 
-   throws org.jboss.deployers.spi.DeploymentException ,java.io.IOException {}
-   
+ 
    private static final String PETER_NAME = "Pete Muir";
    private static final String PETER_USERNAME = "pmuir";
    

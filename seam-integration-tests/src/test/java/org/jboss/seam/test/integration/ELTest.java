@@ -17,10 +17,7 @@ import org.testng.annotations.Test;
 public class ELTest extends SeamTest
 {
    
-   @Override
-   protected void startJbossEmbeddedIfNecessary() 
-   throws org.jboss.deployers.spi.DeploymentException ,java.io.IOException {}
-   
+  
    @Test
    public void testUnifiedELMethodBinding() throws Exception
    {
