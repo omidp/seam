@@ -1,7 +1,7 @@
 package org.jboss.seam.test.integration;
 
 import java.io.Serializable;
-import org.hibernate.validator.Length;
+import javax.validation.constraints.Size;
 
 import org.jboss.seam.annotations.Name;
 
@@ -19,7 +19,7 @@ public class Person implements Serializable
    
    private String name;
    
-   @Length(min = 3, max = 10)
+   @Size(min = 3, max = 10)
    public String getName()
    {
       return name;

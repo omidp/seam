@@ -5,14 +5,12 @@ import org.jboss.seam.annotations.Factory;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.annotations.Out;
 import org.jboss.seam.core.Init;
-import org.jboss.seam.mock.SeamTest;
-import org.testng.annotations.Test;
+import org.jboss.seam.mock.JUnitSeamTest;
+import org.junit.Test;
 
 public class NamespaceTest 
-    extends SeamTest 
+    extends JUnitSeamTest 
 {
-  
-    
     @Test
     public void nameSpaceComponent() 
         throws Exception 
@@ -82,10 +80,9 @@ public class NamespaceTest
             }
         }.run();
     }
-
-
+    
     @Name("namespaceTest.fooFactory")
-    static public class FooFactory {
+    public static class FooFactory {
         public class Foo {}
         
         @Factory("namespaceTest.ns1.factory")
@@ -101,7 +98,4 @@ public class NamespaceTest
         public void someMethod() {
         }
     }
-    
-
-
 }

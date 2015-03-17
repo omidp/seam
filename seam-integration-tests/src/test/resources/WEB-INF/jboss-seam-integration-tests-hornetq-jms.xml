@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<messaging-deployment xmlns="urn:jboss:messaging-deployment:1.0">
+    <hornetq-server>
+        <jms-destinations>
+            <jms-topic name="seamTestTopic">
+                <entry name="/topic/seamTest"/>
+            </jms-topic>
+            <jms-queue name="seamTestQueue">
+                <entry name="/queue/seamTest"/>
+            </jms-queue>
+        </jms-destinations>
+    </hornetq-server>
+</messaging-deployment>

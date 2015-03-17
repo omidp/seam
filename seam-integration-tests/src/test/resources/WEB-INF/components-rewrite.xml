@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<components xmlns="http://jboss.org/schema/seam/components"
+            xmlns:core="http://jboss.org/schema/seam/core"
+            xmlns:web="http://jboss.org/schema/seam/web"
+            xmlns:persistence="http://jboss.org/schema/seam/persistence"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation=
+                "http://jboss.org/schema/seam/core http://jboss.org/schema/seam/core-2.3.xsd 
+                 http://jboss.org/schema/seam/components http://jboss.org/schema/seam/components-2.3.xsd 
+                 http://jboss.org/schema/seam/web http://jboss.org/schema/seam/web-2.3.xsd
+                 http://jboss.org/schema/seam/persistence http://jboss.org/schema/seam/persistence-2.3.xsd" >
+    
+    <core:init debug="false" jndi-pattern="java:app/test/#{ejbName}" />
+
+    <core:manager concurrent-request-timeout="500"
+                  conversation-timeout="120000" 
+                  conversation-id-parameter="cid"/>
+                                     
+	<web:rewrite-filter view-mapping="/seam/*"/>
+	
+	<persistence:managed-persistence-context name="entityManager"
+                                             auto-create="true"
+                                             persistence-unit-jndi-name="java:/integrationEntityManagerFactory" />
+
+</components>

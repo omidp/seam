@@ -1,13 +1,26 @@
 package org.jboss.seam.test.integration;
 
+import org.jboss.arquillian.container.test.api.Deployment;
+import org.jboss.arquillian.container.test.api.OverProtocol;
+import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.seam.init.NamespacePackageResolver;
-import org.jboss.seam.mock.SeamTest;
-import org.testng.Assert;
-import org.testng.annotations.Test;
+import org.jboss.seam.mock.JUnitSeamTest;
+import org.jboss.shrinkwrap.api.Archive;
+import org.junit.runner.RunWith;
+import org.junit.Assert;
+import org.junit.Test;
 
+@RunWith(Arquillian.class)
 public class NamespaceResolverTest 
-    extends SeamTest
+    extends JUnitSeamTest
 {
+	@Deployment(name="NamespaceResolverTest")
+    @OverProtocol("Servlet 3.0") 
+    public static Archive<?> createDeployment()
+    {
+        return Deployments.defaultSeamDeployment();
+    }
+	
 	NamespacePackageResolver resolver = new NamespacePackageResolver();
 
 	@Test
@@ -42,10 +55,10 @@ public class NamespaceResolverTest
 	}
 
 	private void test(String namespace, String packageName) {
-		Assert.assertEquals(resolver.resolve(namespace), packageName);
+		Assert.assertEquals(packageName, resolver.resolve(namespace));
 	}
 	
 	private void testFail(String namespace) {
-		Assert.assertNull(resolver.resolve(namespace), namespace);
+		Assert.assertNull(namespace, resolver.resolve(namespace));
 	}
 }

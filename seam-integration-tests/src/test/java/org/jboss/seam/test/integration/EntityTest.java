@@ -1,22 +1,34 @@
 package org.jboss.seam.test.integration;
 
-import org.jboss.seam.mock.SeamTest;
+import org.jboss.arquillian.container.test.api.Deployment;
+import org.jboss.arquillian.container.test.api.OverProtocol;
+import org.jboss.arquillian.junit.Arquillian;
+import org.jboss.seam.mock.JUnitSeamTest;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.persistence.EntityManager;
 
-import org.hibernate.StaleStateException;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.annotations.Observer;
 import org.jboss.seam.contexts.Contexts;
 import org.jboss.seam.core.Manager;
-import org.testng.Assert;
-import org.testng.annotations.Test;
+import org.jboss.shrinkwrap.api.Archive;
+import org.junit.Assert;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
+@RunWith(Arquillian.class)
 public class EntityTest 
-    extends SeamTest 
+    extends JUnitSeamTest 
 {
+	@Deployment(name="EntityTest")
+	@OverProtocol("Servlet 3.0")
+	public static Archive<?> createDeployment()
+	{
+		return Deployments.defaultSeamDeployment()
+				.addClasses(Thing.class);
+	}
 
     @Test
     public void entityUpdatedInNestedConversation() throws Exception {
@@ -108,32 +120,28 @@ public class EntityTest
             }
         }.run();
 
-        try {
-            new FacesRequest("/page.xhtml", conversation1) {
-                EntityExceptionObserver observer;
+        new FacesRequest("/page.xhtml", conversation1) {
+            EntityExceptionObserver observer;
                 
-                @Override
-                protected void invokeApplication() throws Exception {
-                    Thing thing = (Thing) Contexts.getConversationContext().get("thing");
-                    thing.setName("bar");
+            @Override
+            protected void invokeApplication() throws Exception {
+                Thing thing = (Thing) Contexts.getConversationContext().get("thing");
+                thing.setName("bar");
                    
-                    observer = (EntityExceptionObserver) getValue("#{entityExceptionObserver}");
-                    assert observer != null;
-                }
+                observer = (EntityExceptionObserver) getValue("#{entityExceptionObserver}");
+                assert observer != null;
+            }
                 
-                @Override
-                protected void renderResponse() throws Exception {
-                    Assert.fail("page rendered without redirect, expected StaleStateException!");
-                }
+            @Override
+            protected void renderResponse() throws Exception {
+                Assert.fail("page rendered without redirect, expected StaleStateException!");
+            }
                 
-                @Override
-                protected void afterRequest() {
-                   assert observer.getOptimisticLockExceptionSeen();
-                }        
-            }.run();
-
-        } catch (StaleStateException e) {
-        }
+            @Override
+            protected void afterRequest() {
+               assert observer.getOptimisticLockExceptionSeen();
+            }        
+        }.run();
     }
     
     @Name("entityExceptionObserver")

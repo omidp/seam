@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:s="http://jboss.org/schema/seam/taglib"
+      xml:lang="en"  
+      lang="en">
+
+<f:view>
+   <h:head>
+      <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+   </h:head>
+   <h:body>
+   		<h:form id="form">
+            <h:inputText value="#{testslink.input}" size="20" required="true" id="input"/>
+	   		<s:link id="testslink" view="/testslink.xhtml" propagation="none" value="RecreateLink">
+	        	<f:param name="input" value="#{testslink.input}"/>
+	        </s:link>
+        </h:form>
+   </h:body>
+</f:view>
+
+</html>

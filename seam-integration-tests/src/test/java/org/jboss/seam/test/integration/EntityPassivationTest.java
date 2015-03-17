@@ -10,6 +10,9 @@ import java.util.Set;
 
 import javax.persistence.EntityManager;
 
+import org.jboss.arquillian.container.test.api.Deployment;
+import org.jboss.arquillian.container.test.api.OverProtocol;
+import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.seam.Component;
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.AutoCreate;
@@ -19,9 +22,11 @@ import org.jboss.seam.annotations.Name;
 import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.contexts.Contexts;
 import org.jboss.seam.core.Conversation;
-import org.jboss.seam.mock.SeamTest;
+import org.jboss.seam.mock.JUnitSeamTest;
 import org.jboss.seam.persistence.ManagedEntityInterceptor;
-import org.testng.annotations.Test;
+import org.jboss.shrinkwrap.api.Archive;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 /**
  * Verifies the work of the ManagedEntityInterceptor. Specifically that
@@ -34,8 +39,17 @@ import org.testng.annotations.Test;
  * @author Norman Richards
  * @author Dan Allen
  */
-public class EntityPassivationTest extends SeamTest
+@RunWith(Arquillian.class)
+public class EntityPassivationTest extends JUnitSeamTest
 {
+   @Deployment(name="EntityPassivationTest")
+   @OverProtocol("Servlet 3.0") 
+   public static Archive<?> createDeployment()
+   {
+       return Deployments.defaultSeamDeployment()
+       	.addClasses(SomeComponent.class, NestedComponent.class, UnversionedThing.class);
+   }
+    
    @Test
    public void testEntityList() throws Exception
    {
@@ -164,7 +178,7 @@ public class EntityPassivationTest extends SeamTest
          }  
       }.run();
    }
-
+   
    @Name("entitytest.someComponent")
    @Scope(ScopeType.CONVERSATION)
    @AutoCreate
@@ -228,9 +242,8 @@ public class EntityPassivationTest extends SeamTest
          thing2.setName("thing two");
          entityManager.persist(thing2);
       }
-
    }
-
+   
    @Name("entitytest.nestedComponent")
    @Scope(ScopeType.CONVERSATION)
    @AutoCreate

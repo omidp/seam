@@ -18,17 +18,32 @@ import java.util.Set;
 import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 
+import org.jboss.arquillian.container.test.api.Deployment;
+import org.jboss.arquillian.container.test.api.OverProtocol;
+import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.seam.faces.DataModels;
 import org.jboss.seam.jsf.ArrayDataModel;
 import org.jboss.seam.jsf.MapDataModel;
 import org.jboss.seam.jsf.SetDataModel;
-import org.jboss.seam.mock.SeamTest;
+import org.jboss.seam.mock.JUnitSeamTest;
+import org.jboss.seam.test.integration.Deployments;
 import org.jboss.seam.test.integration.Foo;
+import org.jboss.seam.test.integration.People;
 import org.jboss.seam.test.integration.Person;
-import org.testng.annotations.Test;
+import org.jboss.shrinkwrap.api.Archive;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
-public class DataModelTest extends SeamTest
+@RunWith(Arquillian.class)
+public class DataModelTest extends JUnitSeamTest
 {
+   @Deployment(name="DataModelTest")
+   @OverProtocol("Servlet 3.0") 
+   public static Archive<?> createDeployment()
+   {
+      return Deployments.defaultSeamDeployment()
+    		  .addClasses(Foo.class, Person.class, People.class);
+   }
    
    @Test
    public void testDataModels() throws Exception

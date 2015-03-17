@@ -8,15 +8,31 @@ import java.util.Locale;
 import javax.faces.component.UIOutput;
 import javax.faces.event.ValueChangeEvent;
 
+import junit.framework.Assert;
+
+import org.jboss.arquillian.container.test.api.Deployment;
+import org.jboss.arquillian.container.test.api.OverProtocol;
+import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.seam.international.LocaleConfig;
 import org.jboss.seam.international.LocaleSelector;
 import org.jboss.seam.Seam;
 import org.jboss.seam.contexts.Contexts;
-import org.jboss.seam.mock.SeamTest;
-import org.testng.annotations.Test;
+import org.jboss.seam.mock.JUnitSeamTest;
+import org.jboss.seam.test.integration.Deployments;
+import org.jboss.shrinkwrap.api.Archive;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
-public class LocaleTest extends SeamTest
+@RunWith(Arquillian.class)
+public class LocaleTest extends JUnitSeamTest
 {
+   @Deployment(name="LocaleTest")
+   @OverProtocol("Servlet 3.0") 
+   public static Archive<?> createDeployment()
+   {
+      return Deployments.defaultSeamDeployment();
+   }
+
    @Test
    public void localeTest() throws Exception
    {
@@ -45,67 +61,68 @@ public class LocaleTest extends SeamTest
             {
                supportedLocales.add(iter.next());
             }
-            assert supportedLocales.size() == 3;
-            assert supportedLocales.contains(Locale.CANADA_FRENCH);
-            assert supportedLocales.contains(Locale.ENGLISH);
-            assert supportedLocales.contains(Locale.FRANCE);
-            assert getFacesContext().getApplication().getDefaultLocale().equals(Locale.CANADA_FRENCH);
+
+            Assert.assertEquals(3, supportedLocales.size());
+            Assert.assertTrue( supportedLocales.contains(Locale.CANADA_FRENCH) );
+            Assert.assertTrue( supportedLocales.contains(Locale.ENGLISH) );
+            Assert.assertTrue( supportedLocales.contains(Locale.FRANCE) );
+            Assert.assertEquals(Locale.CANADA_FRENCH, getFacesContext().getApplication().getDefaultLocale());
             
             // why not? I guess be default locale means different things in different contexts (server vs user)
             //assert org.jboss.seam.international.Locale.instance().equals(Locale.CANADA_FRENCH);
             
             // reset the locale configuration (as it would be w/o <i18n:locale-config>)
             getFacesContext().getApplication().setDefaultLocale(Locale.ENGLISH);
-            getFacesContext().getApplication().setSupportedLocales(null);
+            //getFacesContext().getApplication().setSupportedLocales(null);
             
-            assert org.jboss.seam.international.Locale.instance().equals(Locale.getDefault());
+            Assert.assertEquals(Locale.getDefault(), org.jboss.seam.international.Locale.instance());
             
             LocaleSelector.instance().setLocale(Locale.UK);
             
-            assert org.jboss.seam.international.Locale.instance().equals(Locale.UK);
+            Assert.assertEquals(Locale.UK, org.jboss.seam.international.Locale.instance());
           
             LocaleSelector.instance().setLocaleString(Locale.FRANCE.toString());
             
-            assert LocaleSelector.instance().getLanguage().equals(Locale.FRANCE.getLanguage());
-            assert LocaleSelector.instance().getCountry().equals(Locale.FRANCE.getCountry());
-            assert LocaleSelector.instance().getVariant().equals(Locale.FRANCE.getVariant());
+            Assert.assertEquals(Locale.FRANCE.getLanguage(), LocaleSelector.instance().getLanguage());
+            Assert.assertEquals(Locale.FRANCE.getCountry(), LocaleSelector.instance().getCountry());
+            Assert.assertEquals(Locale.FRANCE.getVariant(), LocaleSelector.instance().getVariant());
             
-            assert org.jboss.seam.international.Locale.instance().equals(Locale.FRANCE);
-            assert LocaleSelector.instance().getLocaleString().equals(Locale.FRANCE.toString());
+            Assert.assertEquals(Locale.FRANCE, org.jboss.seam.international.Locale.instance());
+            Assert.assertEquals(Locale.FRANCE.toString(), LocaleSelector.instance().getLocaleString());
             
             LocaleSelector.instance().select();
-            assert org.jboss.seam.international.Locale.instance().equals(Locale.FRANCE);
+            Assert.assertEquals(Locale.FRANCE, org.jboss.seam.international.Locale.instance());
             
             LocaleSelector.instance().selectLanguage(Locale.JAPANESE.getLanguage());
-            assert org.jboss.seam.international.Locale.instance().getLanguage().equals(Locale.JAPANESE.getLanguage());
+            Assert.assertEquals(Locale.JAPANESE.getLanguage(), org.jboss.seam.international.Locale.instance().getLanguage());
             
             ValueChangeEvent valueChangeEvent = new ValueChangeEvent(new UIOutput(), Locale.JAPANESE.toString(), Locale.TAIWAN.toString());
             LocaleSelector.instance().select(valueChangeEvent);
-            assert org.jboss.seam.international.Locale.instance().equals(Locale.TAIWAN);
+            Assert.assertEquals(Locale.TAIWAN, LocaleSelector.instance().getLocale());
             
             Locale uk_posix = new Locale(Locale.UK.getLanguage(), Locale.UK.getCountry(), "POSIX");
             LocaleSelector.instance().setLocale(uk_posix);
             
-            assert org.jboss.seam.international.Locale.instance().equals(uk_posix);
-            assert LocaleSelector.instance().getLanguage().equals(uk_posix.getLanguage());
-            assert LocaleSelector.instance().getCountry().equals(uk_posix.getCountry());
-            assert LocaleSelector.instance().getVariant().equals(uk_posix.getVariant());
+            Assert.assertEquals(uk_posix, org.jboss.seam.international.Locale.instance());
+            Assert.assertEquals(uk_posix.getLanguage(), LocaleSelector.instance().getLanguage());
+            Assert.assertEquals(uk_posix.getCountry(), LocaleSelector.instance().getCountry());
+            Assert.assertEquals(uk_posix.getVariant(), LocaleSelector.instance().getVariant());
             
             LocaleSelector.instance().setLanguage(Locale.CHINA.getLanguage());
             LocaleSelector.instance().setCountry(Locale.CHINA.getCountry()); 
             LocaleSelector.instance().setVariant(null);
             
-            assert org.jboss.seam.international.Locale.instance().equals(Locale.CHINA);
+            Assert.assertEquals(Locale.CHINA, org.jboss.seam.international.Locale.instance());
             
             LocaleSelector.instance().setLanguage(Locale.ITALIAN.getLanguage());
             LocaleSelector.instance().setCountry(null);            
             LocaleSelector.instance().setVariant(null);
             
-            assert org.jboss.seam.international.Locale.instance().equals(Locale.ITALIAN);
+            Assert.assertEquals(Locale.ITALIAN, org.jboss.seam.international.Locale.instance());
             
-            assert LocaleSelector.instance().getSupportedLocales().size() == 1;
-            assert LocaleSelector.instance().getSupportedLocales().get(0).getValue().equals(Locale.ENGLISH.toString());
-            assert LocaleSelector.instance().getSupportedLocales().get(0).getLabel().equals(Locale.ENGLISH.getDisplayName());
+            Assert.assertEquals(3, LocaleSelector.instance().getSupportedLocales().size());
+            Assert.assertEquals(Locale.ENGLISH.toString(), LocaleSelector.instance().getSupportedLocales().get(2).getValue() );
+            Assert.assertEquals(Locale.ENGLISH.getDisplayName(), LocaleSelector.instance().getSupportedLocales().get(2).getLabel() );
 
             boolean failed = false;
             try
@@ -116,7 +133,7 @@ public class LocaleTest extends SeamTest
             {
                failed = true;
             }
-            assert failed;
+            Assert.assertEquals(true, failed);
             
             // TODO Test cookie stuff (need to extend Mocks for this)
             

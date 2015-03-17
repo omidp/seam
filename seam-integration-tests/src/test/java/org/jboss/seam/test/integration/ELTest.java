@@ -6,25 +6,24 @@ import javax.faces.el.ValueBinding;
 
 import org.jboss.seam.jsf.UnifiedELMethodBinding;
 import org.jboss.seam.jsf.UnifiedELValueBinding;
-import org.jboss.seam.mock.SeamTest;
-import org.testng.annotations.Test;
+import org.jboss.seam.mock.JUnitSeamTest;
+import org.junit.Test;
+
 
 /**
  * 
  * @author Pete Muir
  *
  */
-public class ELTest extends SeamTest
-{
-   
-  
+public class ELTest extends JUnitSeamTest
+{     
    @Test
    public void testUnifiedELMethodBinding() throws Exception
    {
       new FacesRequest() 
       {
          @SuppressWarnings("deprecation")
-        @Override
+         @Override
          protected void invokeApplication() throws Exception
          {
             MethodBinding methodBinding = new UnifiedELMethodBinding("#{action.go}", new Class[0]);

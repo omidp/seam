@@ -8,24 +8,38 @@ import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
 import javax.security.auth.login.AppConfigurationEntry.LoginModuleControlFlag;
 
+import org.jboss.arquillian.container.test.api.Deployment;
+import org.jboss.arquillian.container.test.api.OverProtocol;
+import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.seam.Component;
 import org.jboss.seam.contexts.Contexts;
 import org.jboss.seam.contexts.Lifecycle;
-import org.jboss.seam.mock.AbstractSeamTest;
+import org.jboss.seam.mock.JUnitSeamTest;
 import org.jboss.seam.mock.MockLoginModule;
 import org.jboss.seam.security.AuthorizationException;
 import org.jboss.seam.security.Identity;
 import org.jboss.seam.security.NotLoggedInException;
+import org.jboss.seam.test.integration.Deployments;
 import org.jboss.seam.web.Session;
-import org.testng.annotations.Test;
+import org.jboss.shrinkwrap.api.Archive;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 /**
  * Seam Security Unit Tests
  * 
  * @author Shane Bryzak
  */
-public class SecurityTest extends AbstractSeamTest
-{     
+@RunWith(Arquillian.class)
+public class SecurityTest extends JUnitSeamTest
+{
+   @Deployment(name="SecurityTest")
+   @OverProtocol("Servlet 3.0") 
+   public static Archive<?> createDeployment()
+   {
+      return Deployments.defaultSeamDeployment();
+   }
+	
    private Configuration createMockJAASConfiguration()
    {
       return new Configuration()

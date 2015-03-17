@@ -1,0 +1,154 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:a="http://richfaces.org/a4j"
+	xmlns:s="http://jboss.org/schema/seam/taglib">
+<h:head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title>Seam Conversations Test</title>
+</h:head>
+<h:body>
+	<h:form id="form">
+
+		<div>
+			<h:commandButton id="begin" value="begin"
+				action="#{ConversationAction.begin()}" />
+		</div>
+
+		<div>
+			<h:commandButton id="end" value="end"
+				action="#{ConversationAction.end()}" />
+		</div>
+
+		<div>
+			<h:commandButton id="view_output" value="view output"
+				action="#{ConversationAction.viewOutput()}" />
+		</div>
+		<div>
+			<h:commandButton id="redirect_output" value="redirect output"
+				action="#{ConversationAction.redirectOutput()}" />
+		</div>
+		<div>
+			<h:commandButton id="pages_render" value="pages render"
+				action="#{ConversationAction.pagesRender}" />
+		</div>
+		<div>
+			<h:commandButton id="pages_redirect" value="pages redirect"
+				action="#{ConversationAction.pagesRedirect}" />
+		</div>
+
+		<div>
+			<h:commandButton id="programmatic_redirect" value="programmatic redirect"
+				action="#{ConversationAction.programmaticRedirect()}" />
+		</div>
+
+		<div>
+			<h:commandButton id="programmatic_redirect_ajax" value="programmatic redirect with AJAX"
+				action="#{ConversationAction.programmaticRedirect()}">
+				<f:ajax />
+			</h:commandButton>
+		</div>
+		
+		<div>
+            <h:commandButton id="programmatic_redirect_no_propagation" value="programmatic redirect no propagation"
+                action="#{ConversationAction.programmaticRedirectNoPropagation()}" />
+        </div>
+
+        <div>
+            <h:commandButton id="programmatic_redirect_no_propagation_ajax" value="programmatic redirect no propagation with AJAX"
+                action="#{ConversationAction.programmaticRedirectNoPropagation()}">
+                <f:ajax />
+            </h:commandButton>
+        </div>
+
+		<div>
+			<h:outputLink id="output_link" value="output.seam">
+			Output Link
+			</h:outputLink>
+		</div>
+
+		<div>
+			<h:outputLink id="output_link_with_cid" value="output.seam">
+				<s:conversationId />
+                    Output Link with cid
+                </h:outputLink>
+		</div>
+
+		<div>
+			<s:button id="sbutton_view_action_propagation_none" action="#{ConversationAction.viewOutput()}"
+				value="SButton view action no propagation" propagation="none"></s:button>
+		</div>
+
+		<div>
+			<s:button id="sbutton_view_propagation_none" view="/output.xhtml" value="SButton view no propagation"
+				propagation="none"></s:button>
+		</div>
+
+		<div>
+			<s:button id="sbutton_view_propagation_join" view="/output.xhtml" value="SButton view join propagation"
+				propagation="join"></s:button>
+		</div>
+
+		<div>
+			<s:button id="sbutton_view_propagation_none_with_conversationPropagation" view="/output.xhtml"
+				value="SButton view no propagation with s:conversationPropagation none"
+				propagation="none">
+				<s:conversationPropagation type="none" />
+			</s:button>
+		</div>
+
+		<div>
+			<h:commandButton id="exception" value="exception"
+				action="#{ConversationAction.raiseException()}" />
+		</div>
+		<div>
+			<h:commandButton id="conversation_ending_exception"
+				value="conversation ending exception"
+				action="#{ConversationAction.raiseConversationEndingException()}" />
+		</div>
+
+		<div>
+			<h:commandButton id="exception_by_ajax" value="exception by AJAX"
+				action="#{ConversationAction.raiseException()}">
+				<f:ajax />
+			</h:commandButton>
+		</div>
+		<div>
+			<h:commandButton id="conversation_ending_exception_by_ajax"
+				value="conversation ending exception by AJAX"
+				action="#{ConversationAction.raiseConversationEndingException()}">
+				<f:ajax />
+			</h:commandButton>
+		</div>
+
+		<div>
+			<h:outputLink id="localhost" value="http://127.0.0.1:8080">
+                    http://127.0.0.1:8080
+            </h:outputLink>
+		</div>
+
+		<div>
+			<h:commandButton id="xyzzy" action="#{ConversationAction.xyzzy}" value="Xyzzy">
+			</h:commandButton>
+		</div>
+
+		<div>
+			<h:commandButton id="ajax" action="#{ConversationAction.xyzzy}" value="AJAX">
+				<f:ajax render="ajaxOutput"></f:ajax>
+			</h:commandButton>
+		</div>
+
+		<h:panelGroup id="ajaxOutput">
+			<h:outputText value="#{ConversationAction.state}" />
+			<h:outputLink id="ajaxOutput_link" value="output.seam">
+				<s:conversationId />
+                    Output Link with cid
+                </h:outputLink>
+		</h:panelGroup>
+
+	</h:form>
+</h:body>
+</html>

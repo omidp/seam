@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<components xmlns="http://jboss.org/schema/seam/components"
+            xmlns:bpm="http://jboss.org/schema/seam/bpm"
+            xmlns:core="http://jboss.org/schema/seam/core"
+            xmlns:i18n="http://jboss.org/schema/seam/international"
+            xmlns:security="http://jboss.org/schema/seam/security"
+            xmlns:persistence="http://jboss.org/schema/seam/persistence"
+            xmlns:web="http://jboss.org/schema/seam/web"
+            xmlns:framework="http://jboss.org/schema/seam/framework"
+            xmlns:jms="http://jboss.org/schema/seam/jms"            
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation=
+                "http://jboss.org/schema/seam/core http://jboss.org/schema/seam/core-2.3.xsd 
+                 http://jboss.org/schema/seam/bpm http://jboss.org/schema/seam/bpm-2.3.xsd 
+                 http://jboss.org/schema/seam/international http://jboss.org/schema/seam/international-2.3.xsd 
+                 http://jboss.org/schema/seam/security http://jboss.org/schema/seam/security-2.3.xsd
+                 http://jboss.org/schema/seam/persistence http://jboss.org/schema/seam/persistence-2.3.xsd
+                 http://jboss.org/schema/seam/components http://jboss.org/schema/seam/components-2.3.xsd 
+                 http://jboss.org/schema/seam/web http://jboss.org/schema/seam/web-2.3.xsd 
+                 http://jboss.org/schema/seam/jms http://jboss.org/schema/seam/jms-2.3.xsd 
+                 http://jboss.org/schema/seam/framework http://jboss.org/schema/seam/framework-2.3.xsd">
+    
+    <core:init debug="false" jndi-pattern="@jndiPattern@" />
+
+    <core:manager concurrent-request-timeout="500"
+                  conversation-timeout="120000" 
+                  conversation-id-parameter="cid"/>
+
+    <i18n:locale-config default-locale="fr_CA" supported-locales="fr_CA fr_FR en"/>
+    
+    <persistence:managed-persistence-context name="entityManager"
+                                             auto-create="true"
+                                             persistence-unit-jndi-name="java:/integrationEntityManagerFactory" />
+    
+    
+    <bpm:jbpm>
+        <bpm:process-definitions>
+            <value>testProcess1.jpdl.xml</value>
+            <value>testProcess2.jpdl.xml</value>
+            <value>testProcess3.jpdl.xml</value>
+            <value>testProcess4.jpdl.xml</value>
+        </bpm:process-definitions>
+    </bpm:jbpm>
+
+</components>

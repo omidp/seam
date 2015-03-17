@@ -19,7 +19,7 @@
     	<module>mail-ear</module>
     	<module>mail-ejb</module>
     	<module>mail-web</module>
-    	<module>mail-tests</module>
+    	<!--<module>mail-tests</module>-->
     </modules>
     
     <dependencyManagement>

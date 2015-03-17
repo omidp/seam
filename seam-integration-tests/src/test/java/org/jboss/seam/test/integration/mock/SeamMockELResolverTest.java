@@ -9,8 +9,15 @@ import javax.el.ELResolver;
 import javax.el.PropertyNotFoundException;
 import javax.el.PropertyNotWritableException;
 
-import org.jboss.seam.mock.SeamTest;
-import org.testng.annotations.Test;
+import org.jboss.arquillian.container.test.api.Deployment;
+import org.jboss.arquillian.container.test.api.OverProtocol;
+import org.jboss.arquillian.junit.Arquillian;
+import org.jboss.seam.mock.JUnitSeamTest;
+import org.jboss.seam.test.integration.Deployments;
+import org.jboss.shrinkwrap.api.Archive;
+import org.junit.runner.RunWith;
+import org.junit.Test;
+
 
 /**
  * Test for adding EL resolvers to Seam MockFacesContext
@@ -18,8 +25,15 @@ import org.testng.annotations.Test;
  * @author Pete Muir
  * 
  */
-public class SeamMockELResolverTest extends SeamTest
+@RunWith(Arquillian.class)
+public class SeamMockELResolverTest extends JUnitSeamTest
 {
+   @Deployment(name="SecurityTest")
+   @OverProtocol("Servlet 3.0") 
+   public static Archive<?> createDeployment()
+   {
+      return Deployments.defaultSeamDeployment();
+   }
    
    private static final String property = "customELResolverTest";
 

@@ -1,0 +1,17 @@
+Manifest-Version: 1.0
+Archiver-Version: Plexus Archiver
+Created-By: Apache Maven
+Built-By: omidbiz
+Build-Jdk: 1.7.0_45
+Implementation-Title: JBoss Embedded Bootstrap
+Implementation-Vendor: Seam Framework
+Implementation-Version: 2.2.3
+Specification-Title: JBoss Embedded Bootstrap
+Specification-Vendor: Seam Framework
+Specification-Version: 2.2.3
+
+Name: Build-Information
+Build-Time: 20141010-1806
+Java-Vendor: Oracle Corporation
+Java-Version: 1.7.0_45
+

@@ -13,6 +13,8 @@ import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.core.ResourceLoader;
 import org.jboss.seam.faces.FacesMessages;
 import org.jboss.seam.faces.Renderer;
+import org.jboss.seam.international.StatusMessage;
+import org.jboss.seam.international.StatusMessages;
 import org.jboss.seam.log.Log;
 
 @Name("mailExample")
@@ -26,6 +28,7 @@ public class MailExample
    @In
    private FacesMessages facesMessages;
    
+   
    @In
    private Renderer renderer;
    
@@ -38,50 +41,50 @@ public class MailExample
    public void send() {
       try {
         renderer.render("/simple.xhtml");
-        facesMessages.add("Email sent successfully");
+        facesMessages.addFromResourceBundleOrDefault("Email sent successfully", "Email sent successfully", null);
       } catch (Exception e) {
          log.error("Error sending mail", e);
-         facesMessages.add(FacesMessage.SEVERITY_INFO, "Email sending failed: " + e.getMessage());
+//         facesMessages.add(FacesMessage.SEVERITY_INFO, "Email sending failed: " + e.getMessage());
       }
    }
    
    public void sendAttachment() {
       try {
         renderer.render("/attachment.xhtml");
-        facesMessages.add("Email sent successfully");
+//        facesMessages.add("Email sent successfully");
       } catch (Exception e) {
          log.error("Error sending mail", e);
-         facesMessages.add(FacesMessage.SEVERITY_INFO, "Email sending failed: " + e.getMessage());
+//         facesMessages.add(FacesMessage.SEVERITY_INFO, "Email sending failed: " + e.getMessage());
       }
    }
    
    public void sendHtml() {
       try {
          renderer.render("/html.xhtml");
-         facesMessages.add("Email sent successfully");
+//         facesMessages.add("Email sent successfully");
       } catch (Exception e) {
          log.error("Error sending mail", e);
-         facesMessages.add("Email sending failed:" + e.getMessage());
+//         facesMessages.add("Email sending failed:" + e.getMessage());
       }
     }
 
    public void sendPlain() {
       try {
          renderer.render("/plain.xhtml");
-         facesMessages.add("Email sent successfully");
+//         facesMessages.add("Email sent successfully");
       } catch (Exception e) {
          log.error("Error sending mail", e);
-         facesMessages.add("Email sending failed: " + e.getMessage());
+//         facesMessages.add("Email sending failed: " + e.getMessage());
       }
     }
    
    public void sendTemplate() {
       try {
          renderer.render("/templating.xhtml");
-         facesMessages.add("Email sent successfully");
+//         facesMessages.add("Email sent successfully");
       } catch (Exception e) {
          log.error("Error sending mail", e);
-         facesMessages.add("Email sending failed: " + e.getMessage());
+//         facesMessages.add("Email sending failed: " + e.getMessage());
       }
     }
    

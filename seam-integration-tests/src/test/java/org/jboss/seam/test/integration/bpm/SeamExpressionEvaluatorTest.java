@@ -1,15 +1,30 @@
 package org.jboss.seam.test.integration.bpm;
 
-import org.jboss.seam.mock.SeamTest;
+import org.jboss.arquillian.container.test.api.Deployment;
+import org.jboss.arquillian.container.test.api.OverProtocol;
+import org.jboss.arquillian.junit.Arquillian;
+import org.jboss.seam.mock.JUnitSeamTest;
+import org.jboss.seam.test.integration.Deployments;
+import org.jboss.shrinkwrap.api.Archive;
 import org.jbpm.jpdl.el.ELException;
-import org.testng.annotations.Test;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 /**
  * @author Pete Muir
  *
  */
-public class SeamExpressionEvaluatorTest extends SeamTest
+//@Ignore
+@RunWith(Arquillian.class)
+public class SeamExpressionEvaluatorTest extends JUnitSeamTest
 {
+   @Deployment(name="SeamExpressionEvaluatorTest")
+   @OverProtocol("Servlet 3.0") 
+   public static Archive<?> createDeployment()
+   {
+      return Deployments.jbpmSeamDeployment()
+    		  .addClasses(SeamExpressionEvaluatorTestController.class);
+   }
 
    // Test for JBSEAM-1937
    @Test

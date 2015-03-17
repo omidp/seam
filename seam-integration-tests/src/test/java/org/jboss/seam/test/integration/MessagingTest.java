@@ -1,35 +1,34 @@
 package org.jboss.seam.test.integration;
 
-import javax.ejb.ActivationConfigProperty;
-import javax.ejb.MessageDriven;
 import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.MessageListener;
 import javax.jms.QueueSender;
 import javax.jms.QueueSession;
-import javax.jms.TextMessage;
 import javax.jms.TopicPublisher;
 import javax.jms.TopicSession;
 
+import org.jboss.arquillian.container.test.api.Deployment;
+import org.jboss.arquillian.container.test.api.OverProtocol;
+import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.contexts.Contexts;
-import org.jboss.seam.mock.SeamTest;
-import org.testng.annotations.Test;
+import org.jboss.seam.mock.JUnitSeamTest;
+import org.jboss.shrinkwrap.api.Archive;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
+@RunWith(Arquillian.class)
 public class MessagingTest
-    extends SeamTest
+    extends JUnitSeamTest
 {
-    @Test
-    public void delayForStartup() 
-        throws InterruptedException 
+	@Deployment(name="MessagingTest")
+    @OverProtocol("Servlet 3.0") 
+    public static Archive<?> createDeployment()
     {
-        // need to delay a bit to make sure the messaging system is running
-        // really only needed when running this test in isolation
-        Thread.sleep(5000);
+        return Deployments.defaultSeamDeployment().addClasses(TestQueueListener.class, TestTopicListener.class);
     }
-    
-    @Test(dependsOnMethods={"delayForStartup"})
+	
+    @Test
     public void publishToTopic()
         throws Exception
     {
@@ -43,7 +42,7 @@ public class MessagingTest
                 Contexts.getApplicationContext().set("testMessage", messageText);
                 invokeAction("#{testTopic.publish}");
             }
-        }.run();      
+        }.run();
 
         // need to delay a bit to make sure the message is delivered
         // might need 
@@ -52,7 +51,7 @@ public class MessagingTest
         assert messageText.getValue().equals("message for topic");
     }
     
-    @Test(dependsOnMethods={"delayForStartup"})
+    @Test
     public void sendToQueue()
         throws Exception
     {
@@ -66,7 +65,7 @@ public class MessagingTest
                 Contexts.getApplicationContext().set("testMessage", messageText);
                 invokeAction("#{testQueue.send}");
             }
-        }.run();      
+        }.run();
 
         // need to delay a bit to make sure the message is delivered
         // might need 
@@ -86,9 +85,9 @@ public class MessagingTest
         
         public void publish() 
             throws JMSException 
-        { 
+        {
             testPublisher.publish(topicSession.createTextMessage("message for topic")); 
-        } 
+        }
     }
     
     @Name("testQueue")
@@ -103,53 +102,11 @@ public class MessagingTest
             testSender.send(queueSession.createTextMessage("message for queue")); 
         } 
     }
-    
-    @MessageDriven(activationConfig={
-        @ActivationConfigProperty(propertyName="destinationType", propertyValue="javax.jms.Topic"),
-        @ActivationConfigProperty(propertyName="destination",     propertyValue="topic/testTopic")
-    })
-    @Name("testTopicListener")
-    static public class TestTopicListener 
-        implements MessageListener
-    {
-        @In
-        private SimpleReference<String> testMessage;
 
-        public void onMessage(Message msg)
-        {
-            try {
-                testMessage.setValue(((TextMessage) msg).getText());
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-    }
-    
-    @MessageDriven(activationConfig={
-        @ActivationConfigProperty(propertyName="destinationType", propertyValue="javax.jms.Queue"),
-        @ActivationConfigProperty(propertyName="destination",     propertyValue="queue/testQueue")
-    })
-    @Name("testQueueListener")
-    static public class TestQueueListener 
-        implements MessageListener
-    {
-        @In
-        private SimpleReference<String> testMessage;
 
-        public void onMessage(Message msg)
-        {
-            try {
-                testMessage.setValue(((TextMessage) msg).getText());
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-    }
-    
-    
     static class SimpleReference<T> {
         T value;
-        public SimpleReference() {            
+        public SimpleReference() {
         }
         public SimpleReference(T value) {
             setValue(value);

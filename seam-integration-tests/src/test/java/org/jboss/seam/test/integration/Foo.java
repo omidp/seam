@@ -10,7 +10,7 @@ import java.io.Serializable;
 
 import javax.ejb.Remove;
 
-import org.hibernate.validator.NotNull;
+import javax.validation.constraints.NotNull;
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.Begin;
 import org.jboss.seam.annotations.End;
