@@ -27,9 +27,8 @@ public abstract class Query<T, E> extends PersistenceController<T> // TODO:
 // extend
 // MutableController!
 {
-    private static final Pattern SUBJECT_PATTERN = Pattern
-            .compile("^select\\s+((distinct)?\\s?\\w+(?:\\s*\\.\\s*\\w+)?)(?:\\s,\\s*(\\w+(?:\\s*\\.\\s*\\w+)?))?\\s+from",
-                    Pattern.CASE_INSENSITIVE);
+    private static final Pattern SUBJECT_PATTERN = Pattern.compile(
+            "^select\\s+(\\w+(?:\\s*\\.\\s*\\w+)*?)(?:\\s*,\\s*(\\w+(?:\\s*\\.\\s*\\w+)*?))*?\\s+from", Pattern.CASE_INSENSITIVE);
     private static final Pattern FROM_PATTERN = Pattern.compile("(^|\\s)(from)\\s", Pattern.CASE_INSENSITIVE);
     private static final Pattern WHERE_PATTERN = Pattern.compile("\\s(where)\\s", Pattern.CASE_INSENSITIVE);
     private static final Pattern ORDER_PATTERN = Pattern.compile("\\s(order)(\\s)+by\\s", Pattern.CASE_INSENSITIVE);
@@ -243,11 +242,6 @@ public abstract class Query<T, E> extends PersistenceController<T> // TODO:
         return groupLogicOperator;
     }
 
-    /**
-     * use only with where clause in query
-     * 
-     * @param groupLogicOperator
-     */
     public void setGroupLogicOperator(String groupLogicOperator)
     {
         this.groupLogicOperator = groupLogicOperator;
@@ -255,39 +249,50 @@ public abstract class Query<T, E> extends PersistenceController<T> // TODO:
 
     protected boolean isGroupOperand()
     {
-        return getGroupLogicOperator() != null && getGroupLogicOperator().length() > 0;
+        return getGroupLogicOperator() != null && getGroupLogicOperator().trim().length() > 0;
     }
 
     protected String getRenderedEjbql()
     {
         StringBuilder builder = new StringBuilder().append(parsedEjbql);
-        String restrictionsParam = addRestrictions();
-        if (WHERE_PATTERN.matcher(builder).find())
+        StringBuilder restrictions = new StringBuilder();
+        boolean hasRestriction = false;
+        for (int i = 0; i < getRestrictions().size(); i++)
         {
-            if (restrictionsParam != null && restrictionsParam.length() > 0)
+            Object parameterValue = restrictionParameters.get(i).getValue();
+            if (isRestrictionParameterSet(parameterValue))
             {
-                if (isGroupOperand())
+                hasRestriction = true;
+                if (WHERE_PATTERN.matcher(builder).find())
                 {
-                    builder.append(" ").append(getGroupLogicOperator()).append(" ( ");
-                    builder.append(restrictionsParam);
-                    builder.append(" ) ");
+                    if (isGroupOperand() && i > 0)
+                        restrictions.append(" ").append(getRestrictionLogicOperator()).append(" ");
+                    if (isGroupOperand() == false)
+                        restrictions.append(" ").append(getRestrictionLogicOperator()).append(" ");
                 }
                 else
                 {
-                    if (restrictionsParam != null && restrictionsParam.length() > 0)
-                    {
-                        builder.append(" ").append(getRestrictionLogicOperator()).append("  ");
-                        builder.append(restrictionsParam);
-                    }
+                    builder.append(" where ");
                 }
+                restrictions.append(parsedRestrictions.get(i));
             }
         }
-        else
+        if (WHERE_PATTERN.matcher(builder).find())
         {
-            if (restrictionsParam != null && restrictionsParam.length() > 0)
+            if (isGroupOperand() && hasRestriction)
             {
-                builder.append(" where ");
-                builder.append(restrictionsParam);
+                builder.append(" ").append(getGroupLogicOperator()).append(" ( ");
+            }
+        }
+
+        if (hasRestriction)
+            builder.append(restrictions);
+
+        if (WHERE_PATTERN.matcher(builder).find())
+        {
+            if (isGroupOperand() && hasRestriction)
+            {
+                builder.append(" ) ");
             }
         }
 
@@ -301,22 +306,6 @@ public abstract class Query<T, E> extends PersistenceController<T> // TODO:
             builder.append(" order by ").append(getOrder());
         }
 
-        return builder.toString();
-    }
-
-    private String addRestrictions()
-    {
-        StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < getRestrictions().size(); i++)
-        {
-            Object parameterValue = restrictionParameters.get(i).getValue();
-            if (isRestrictionParameterSet(parameterValue))
-            {
-                if (i > 0)
-                    builder.append(" ").append(getRestrictionLogicOperator()).append(" ");
-                builder.append(parsedRestrictions.get(i));
-            }
-        }
         return builder.toString();
     }
 
