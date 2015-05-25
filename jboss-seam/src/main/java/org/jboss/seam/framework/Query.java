@@ -245,6 +245,7 @@ public abstract class Query<T, E> extends PersistenceController<T> // TODO:
 
     /**
      * use only with where clause in query
+     * 
      * @param groupLogicOperator
      */
     public void setGroupLogicOperator(String groupLogicOperator)
@@ -274,7 +275,10 @@ public abstract class Query<T, E> extends PersistenceController<T> // TODO:
                 else
                 {
                     if (restrictionsParam != null && restrictionsParam.length() > 0)
+                    {
+                        builder.append(" ").append(getRestrictionLogicOperator()).append("  ");
                         builder.append(restrictionsParam);
+                    }
                 }
             }
         }
@@ -308,9 +312,7 @@ public abstract class Query<T, E> extends PersistenceController<T> // TODO:
             Object parameterValue = restrictionParameters.get(i).getValue();
             if (isRestrictionParameterSet(parameterValue))
             {
-                if (isGroupOperand() && i > 0)
-                    builder.append(" ").append(getRestrictionLogicOperator()).append(" ");
-                if (isGroupOperand() == false)
+                if (i > 0)
                     builder.append(" ").append(getRestrictionLogicOperator()).append(" ");
                 builder.append(parsedRestrictions.get(i));
             }
