@@ -71,6 +71,12 @@ public class EntityQuery<E> extends Query<EntityManager, E>
       initResultList();
       return truncResultList(resultList);
    }
+   
+   protected void setResult(List<E> result)
+   {
+       if (resultList == null)
+           this.resultList = result;
+   }
 
    private void initResultList()
    {
