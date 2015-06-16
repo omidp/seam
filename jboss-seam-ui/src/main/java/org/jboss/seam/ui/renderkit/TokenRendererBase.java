@@ -57,7 +57,8 @@ import org.jboss.seam.util.RandomStringUtils;
  * <li>Get the javax.faces.FormSignature request parameter, otherwise throw an
  * exception that the form signature is missing</li>
  * <li>If the renderStampStore component is enabled, retrieve the render stamp
- * from the store using the key stored in the render stamp attribute of the form.</li>
+ * from the store using the key stored in the render stamp attribute of the
+ * form.</li>
  * <li>Generate the hash as before and verify that it equals the value of the
  * javax.faces.FormSignature request parameter, otherwise throw an exception</li>
  * </ol>
@@ -73,138 +74,151 @@ import org.jboss.seam.util.RandomStringUtils;
  */
 public class TokenRendererBase extends RendererBase
 {
-   public static final String FORM_SIGNATURE_PARAM = "javax.faces.FormSignature";
+    public static final String FORM_SIGNATURE_PARAM = "javax.faces.FormSignature";
 
-   public static final String RENDER_STAMP_ATTR = "javax.faces.RenderStamp";
+    public static final String RENDER_STAMP_ATTR = "javax.faces.RenderStamp";
 
-   private static final String COOKIE_CHECK_SCRIPT_KEY = "org.jboss.seam.ui.COOKIE_CHECK_SCRIPT";
+    private static final String COOKIE_CHECK_SCRIPT_KEY = "org.jboss.seam.ui.COOKIE_CHECK_SCRIPT";
 
-   @Override
-   protected Class getComponentClass()
-   {
-      return UIToken.class;
-   }
+    @Override
+    protected Class getComponentClass()
+    {
+        return UIToken.class;
+    }
 
-   @Override
-   protected void doDecode(FacesContext context, UIComponent component)
-   {
-      UIToken token = (UIToken) component;
-      UIForm form = token.getParentForm();
-      if (context.getRenderKit().getResponseStateManager().isPostback(context) && form.isSubmitted())
-      {
-         String clientToken = token.getClientUid();
-         String viewId = context.getViewRoot().getViewId();
-         if (clientToken == null)
-         {
-            throw new UnauthorizedCommandException(viewId, "No client identifier provided");
-         }
+    @Override
+    protected void doDecode(FacesContext context, UIComponent component)
+    {
+        UIToken token = (UIToken) component;
+        UIForm form = token.getParentForm();
+        if (context.getRenderKit().getResponseStateManager().isPostback(context) && form.isSubmitted())
+        {
+            String clientToken = token.getClientUid();
+            String viewId = context.getViewRoot().getViewId();
+            if (clientToken == null)
+            {
+                throw new UnauthorizedCommandException(viewId, "No client identifier provided");
+            }
 
-         String requestedViewSig = context.getExternalContext().getRequestParameterMap().get(FORM_SIGNATURE_PARAM);
-         if (requestedViewSig == null)
-         {
-            throw new UnauthorizedCommandException(viewId, "No form signature provided");
-         }
+            String requestedViewSig = context.getExternalContext().getRequestParameterMap().get(FORM_SIGNATURE_PARAM);
+            if (requestedViewSig == null)
+            {
+                throw new UnauthorizedCommandException(viewId, "No form signature provided");
+            }
 
-         if (!requestedViewSig.equals(generateViewSignature(context, form, !token.isAllowMultiplePosts(), token.isRequireSession(), clientToken)))
-         {
-            throw new UnauthorizedCommandException(viewId, "Form signature invalid");
-         }
-         RenderStampStore store = RenderStampStore.instance();
-         if (store != null)
-         {
-            // remove the key from the store if we are using it
-            store.removeStamp(String.valueOf(form.getAttributes().get(RENDER_STAMP_ATTR)));
-         }
-         form.getAttributes().remove(RENDER_STAMP_ATTR);
-      }
-   }
+            if (!requestedViewSig.equals(generateViewSignature(context, form, !token.isAllowMultiplePosts(), token.isRequireSession(),
+                    clientToken)))
+            {
+                throw new UnauthorizedCommandException(viewId, "Form signature invalid");
+            }
+            RenderStampStore store = RenderStampStore.instance();
+            if (store != null)
+            {
+                // remove the key from the store if we are using it
+                store.removeStamp(String.valueOf(form.getAttributes().get(RENDER_STAMP_ATTR)));
+            }
+            form.getAttributes().remove(RENDER_STAMP_ATTR);
+        }
+    }
 
-   @Override
-   protected void doEncodeBegin(ResponseWriter writer, FacesContext context, UIComponent component) throws IOException
-   {
-      UIToken token = (UIToken) component;
-      UIForm form = token.getParentForm();
-      if (form == null)
-      {
-         throw new IllegalStateException("UIToken must be inside a UIForm.");
-      }
+    @Override
+    protected void doEncodeBegin(ResponseWriter writer, FacesContext context, UIComponent component) throws IOException
+    {
+        UIToken token = (UIToken) component;
+        UIForm form = token.getParentForm();
+        if (form == null)
+        {
+            throw new IllegalStateException("UIToken must be inside a UIForm.");
+        }
 
-      String renderStamp = RandomStringUtils.randomAlphanumeric(50);
-      RenderStampStore store = RenderStampStore.instance();
-      if (store != null)
-      {
-         // if the store is not null we store the key
-         // instead of the actual stamp; this puts the
-         // server in control of this value rather than
-         // the component tree, which is owned by the client
-         // when using client-side state saving
-         renderStamp = store.storeStamp(renderStamp);
-      }
+        String renderStamp = RandomStringUtils.randomAlphanumeric(50);
+        RenderStampStore store = RenderStampStore.instance();
+        if (store != null)
+        {
+            // if the store is not null we store the key
+            // instead of the actual stamp; this puts the
+            // server in control of this value rather than
+            // the component tree, which is owned by the client
+            // when using client-side state saving
+            renderStamp = store.storeStamp(renderStamp);
+        }
 
-      writeCookieCheckScript(context, writer, token);
+        writeCookieCheckScript(context, writer, token);
 
-      token.getClientUidSelector().seed();
-      form.getAttributes().put(RENDER_STAMP_ATTR, renderStamp);
-      writer.startElement(HTML.INPUT_ELEM, component);
-      writer.writeAttribute(HTML.TYPE_ATTR, HTML.INPUT_TYPE_HIDDEN, HTML.TYPE_ATTR);
-      writer.writeAttribute(HTML.NAME_ATTR, FORM_SIGNATURE_PARAM, HTML.NAME_ATTR);
-      writer.writeAttribute(HTML.VALUE_ATTR, generateViewSignature(context, form, !token.isAllowMultiplePosts(), token.isRequireSession(), token.getClientUidSelector().getClientUid()), HTML.VALUE_ATTR);
-      writer.endElement(HTML.INPUT_ELEM);
-   }
+        token.getClientUidSelector().seed();
+        form.getAttributes().put(RENDER_STAMP_ATTR, renderStamp);
+        writer.startElement(HTML.INPUT_ELEM, component);
+        writer.writeAttribute(HTML.TYPE_ATTR, HTML.INPUT_TYPE_HIDDEN, HTML.TYPE_ATTR);
+        writer.writeAttribute(HTML.NAME_ATTR, FORM_SIGNATURE_PARAM, HTML.NAME_ATTR);
+        writer.writeAttribute(
+                HTML.VALUE_ATTR,
+                generateViewSignature(context, form, !token.isAllowMultiplePosts(), token.isRequireSession(), token.getClientUidSelector()
+                        .getClientUid()), HTML.VALUE_ATTR);
+        writer.endElement(HTML.INPUT_ELEM);
+    }
 
-   /**
-    * If the client has not already delivered us a cookie and the cookie notice is enabled, write out JavaScript that will show the user
-    * an alert if cookies are not enabled.
-    */
-   private void writeCookieCheckScript(FacesContext context, ResponseWriter writer, UIToken token) throws IOException
-   {
-      if (!token.getClientUidSelector().isSet() && token.isEnableCookieNotice() && !context.getExternalContext().getRequestMap().containsKey(COOKIE_CHECK_SCRIPT_KEY)) {
-         writer.startElement(HTML.SCRIPT_ELEM, token);
-         writer.writeAttribute(HTML.TYPE_ATTR, "text/javascript", HTML.TYPE_ATTR);
-         writer.write("if (!document.cookie) {" +
-            " alert('This website uses a security measure that requires cookies to be enabled in your browser. Since you have cookies disabled, you will not be permitted to submit a form.');" +
-            " }");
-         writer.endElement(HTML.SCRIPT_ELEM);
-         context.getExternalContext().getRequestMap().put(COOKIE_CHECK_SCRIPT_KEY, true);
-      }
-   }
+    /**
+     * If the client has not already delivered us a cookie and the cookie notice
+     * is enabled, write out JavaScript that will show the user an alert if
+     * cookies are not enabled.
+     */
+    private void writeCookieCheckScript(FacesContext context, ResponseWriter writer, UIToken token) throws IOException
+    {
+        if (!token.getClientUidSelector().isSet() && token.isEnableCookieNotice()
+                && !context.getExternalContext().getRequestMap().containsKey(COOKIE_CHECK_SCRIPT_KEY))
+        {
+            writer.startElement(HTML.SCRIPT_ELEM, token);
+            writer.writeAttribute(HTML.TYPE_ATTR, "text/javascript", HTML.TYPE_ATTR);
+            writer.write("if (!document.cookie) {"
+                    + " alert('This website uses a security measure that requires cookies to be enabled in your browser. Since you have cookies disabled, you will not be permitted to submit a form.');"
+                    + " }");
+            writer.endElement(HTML.SCRIPT_ELEM);
+            context.getExternalContext().getRequestMap().put(COOKIE_CHECK_SCRIPT_KEY, true);
+        }
+    }
 
-   private String generateViewSignature(FacesContext context, UIForm form, boolean useRenderStamp, boolean useSessionId, String saltPhrase)
-   {
-      String rawViewSignature = context.getExternalContext().getRequestContextPath() + "," + context.getViewRoot().getViewId() + "," + form.getClientId(context);
-      if (useRenderStamp)
-      {
-         String renderStamp = form.getAttributes().get(RENDER_STAMP_ATTR).toString();
-         RenderStampStore store = RenderStampStore.instance();
-         if (store != null)
-         {
-            // if we are using the RenderStampStore the key to access the render
-            // stamp
-            // is stored in the view root instead of the actual render stamp
-            renderStamp = store.getStamp(renderStamp);
-         }
-         rawViewSignature += "," + renderStamp;
-      }
-      if (useSessionId)
-      {
-         rawViewSignature += "," + ((HttpSession) context.getExternalContext().getSession(true)).getId();
-      }
-      try
-      {
-         MessageDigest digest = MessageDigest.getInstance("SHA-1");
-         digest.update(saltPhrase.getBytes());
-         byte[] salt = digest.digest();
-         digest.reset();
-         digest.update(rawViewSignature.getBytes());
-         digest.update(salt);
-         byte[] raw = digest.digest();
-         return Base64.encodeBytes(raw);
-      }
-      catch (NoSuchAlgorithmException ex)
-      {
-         ex.printStackTrace();
-         return null;
-      }
-   }
-
+    private String generateViewSignature(FacesContext context, UIForm form, boolean useRenderStamp, boolean useSessionId, String saltPhrase)
+    {
+        String rawViewSignature = context.getExternalContext().getRequestContextPath() + "," + context.getViewRoot().getViewId() + ","
+                + form.getClientId(context);
+        if (useRenderStamp)
+        {
+            Object stampAttr = form.getAttributes().get(RENDER_STAMP_ATTR);
+            if (stampAttr != null)
+            {
+                String renderStamp = stampAttr.toString();
+                RenderStampStore store = RenderStampStore.instance();
+                if (store != null)
+                {
+                    // if we are using the RenderStampStore the key to access
+                    // the render
+                    // stamp
+                    // is stored in the view root instead of the actual render
+                    // stamp
+                    renderStamp = store.getStamp(renderStamp);
+                }
+                rawViewSignature += "," + renderStamp;
+            }
+        }
+        if (useSessionId)
+        {
+            rawViewSignature += "," + ((HttpSession) context.getExternalContext().getSession(true)).getId();
+        }
+        try
+        {
+            MessageDigest digest = MessageDigest.getInstance("SHA-1");
+            digest.update(saltPhrase.getBytes());
+            byte[] salt = digest.digest();
+            digest.reset();
+            digest.update(rawViewSignature.getBytes());
+            digest.update(salt);
+            byte[] raw = digest.digest();
+            return Base64.encodeBytes(raw);
+        }
+        catch (NoSuchAlgorithmException ex)
+        {
+            ex.printStackTrace();
+            return null;
+        }
+    }
 }
