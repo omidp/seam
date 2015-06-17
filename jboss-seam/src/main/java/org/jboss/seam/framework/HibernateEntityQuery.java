@@ -46,18 +46,6 @@ public class HibernateEntityQuery<E> extends Query<Session, E>
         return truncResultList(resultList);
     }
 
-    protected void setResult(List<E> result)
-    {
-        if (this.resultList == null)
-            this.resultList = result;
-    }
-
-    protected void setResultCount(Long resultCount)
-    {
-        if (this.resultCount == null)
-            this.resultCount = resultCount;
-    }
-
     private void initResultList()
     {
         if (resultList == null)
