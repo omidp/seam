@@ -25,6 +25,11 @@ public class DivRendererBase extends StyleRendererBase
    public void startElement(ResponseWriter writer, UIStyle style) throws IOException
    {
       writer.startElement("div", style);
+      Object title = style.getAttributes().get("title");
+      if(title != null)
+      {
+          writer.writeAttribute("title", String.valueOf(title), "title");
+      }
    }
    
 }
