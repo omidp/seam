@@ -153,7 +153,7 @@ public final class Param
     */
    public String getStringValueFromModel(FacesContext facesContext)
    {
-      Object value = getValueExpression().getValue();
+      Object value = getValueExpression() != null ? getValueExpression().getValue() : null;
       if (value==null)
       {
          return null;
