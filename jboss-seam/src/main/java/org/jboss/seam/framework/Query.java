@@ -257,6 +257,7 @@ public abstract class Query<T, E> extends PersistenceController<T> // TODO:
         StringBuilder builder = new StringBuilder().append(parsedEjbql);
         StringBuilder restrictions = new StringBuilder();
         boolean hasRestriction = false;
+        int counter = 0;
         for (int i = 0; i < getRestrictions().size(); i++)
         {
             Object parameterValue = restrictionParameters.get(i).getValue();
@@ -265,7 +266,7 @@ public abstract class Query<T, E> extends PersistenceController<T> // TODO:
                 hasRestriction = true;
                 if (WHERE_PATTERN.matcher(builder).find())
                 {
-                    if (isGroupOperand() && i > 0)
+                    if (isGroupOperand() && counter > 0)
                         restrictions.append(" ").append(getRestrictionLogicOperator()).append(" ");
                     if (isGroupOperand() == false)
                         restrictions.append(" ").append(getRestrictionLogicOperator()).append(" ");
@@ -275,6 +276,7 @@ public abstract class Query<T, E> extends PersistenceController<T> // TODO:
                     builder.append(" where ");
                 }
                 restrictions.append(parsedRestrictions.get(i));
+                counter++;
             }
         }
         if (WHERE_PATTERN.matcher(builder).find())
