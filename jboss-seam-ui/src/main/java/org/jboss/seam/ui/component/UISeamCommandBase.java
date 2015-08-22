@@ -41,7 +41,7 @@ public abstract class UISeamCommandBase extends UIOutput implements ActionSource
       String encodedUrl;
       FacesContext context = getFacesContext();
       String viewId = getView();
-      if (viewId == null)
+      if (viewId == null || viewId.isEmpty())
       {
          viewId = Pages.getViewId(getFacesContext());
       }
