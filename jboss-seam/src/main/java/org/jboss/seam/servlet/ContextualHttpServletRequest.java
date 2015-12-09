@@ -5,7 +5,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.jboss.seam.contexts.Lifecycle;
 import org.jboss.seam.contexts.ServletLifecycle;
@@ -27,20 +26,12 @@ public abstract class ContextualHttpServletRequest
     private static final LogProvider log = Logging.getLogProvider(ContextualHttpServletRequest.class);
 
     private final HttpServletRequest request;
-    private final HttpServletResponse response;
 
     private static ThreadLocal<AtomicInteger> count = new ThreadLocal<AtomicInteger>();
 
     public ContextualHttpServletRequest(HttpServletRequest request)
     {
         this.request = request;
-        this.response = null;
-    }
-
-    public ContextualHttpServletRequest(HttpServletRequest request, HttpServletResponse response)
-    {
-        this.request = request;
-        this.response = response;
     }
 
     public abstract void process() throws Exception;
@@ -50,24 +41,9 @@ public abstract class ContextualHttpServletRequest
         log.debug("beginning request");
 
         // Force creation of the session
-        if (response == null)
+        if (request.getSession(false) == null)
         {
-            if (request.getSession(false) == null)
-            {
-                request.getSession(true);
-            }
-        }
-        else
-        {
-            // Cannot create a session after the response has been committed
-            if (response.isCommitted() == false)
-            {
-                if (request.getSession(false) == null)
-                {
-
-                    request.getSession(true);
-                }
-            }
+            request.getSession(true);
         }
 
         // Begin request and Seam life cycle only if it is not nested
@@ -94,19 +70,8 @@ public abstract class ContextualHttpServletRequest
             if (getCounterValue() == 0)
             {
                 // TODO: conversation timeout
-                if(response == null)
-                {
-                    Manager.instance().endRequest(new ServletRequestSessionMap(request));
-                    ServletLifecycle.endRequest(request);
-                }
-                else
-                {
-                    if (response.isCommitted() == false)
-                    {
-                        Manager.instance().endRequest(new ServletRequestSessionMap(request));
-                        ServletLifecycle.endRequest(request);
-                    }
-                }
+                Manager.instance().endRequest(new ServletRequestSessionMap(request));
+                ServletLifecycle.endRequest(request);
             }
         }
         catch (IOException ioe)

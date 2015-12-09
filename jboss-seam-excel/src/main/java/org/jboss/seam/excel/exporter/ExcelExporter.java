@@ -12,6 +12,7 @@ import javax.faces.component.UIData;
 import javax.faces.component.UIOutput;
 import javax.faces.context.FacesContext;
 
+import org.jboss.seam.Component;
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.Install;
 import org.jboss.seam.annotations.Name;
@@ -240,6 +241,11 @@ public class ExcelExporter
 
          excelWorkbook.addItem(cell);
       }
+   }
+   
+   public static ExcelExporter instance()
+   {
+      return (ExcelExporter) Component.getInstance(ExcelExporter.class);
    }
 
 }
