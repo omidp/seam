@@ -53,7 +53,9 @@ public class Credentials implements Serializable
       if (!isInitialized() && Events.exists())
       {
          setInitialized(true);
-         Events.instance().raiseEvent(EVENT_INIT_CREDENTIALS, this);
+         Credentials _self = this;
+         if(_self != null)
+             Events.instance().raiseEvent(EVENT_INIT_CREDENTIALS, _self);
       }
       
       return username;
