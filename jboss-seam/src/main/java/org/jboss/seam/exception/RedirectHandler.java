@@ -1,5 +1,7 @@
 package org.jboss.seam.exception;
 
+import java.util.Map;
+
 import javax.faces.application.FacesMessage.Severity;
 import javax.faces.context.FacesContext;
 import javax.servlet.http.HttpServletRequest;
@@ -20,46 +22,63 @@ import org.jboss.seam.navigation.Pages;
 public abstract class RedirectHandler extends ExceptionHandler
 {
 
-   private static final LogProvider log = Logging.getLogProvider(RedirectHandler.class);
+    private static final LogProvider log = Logging.getLogProvider(RedirectHandler.class);
 
-   protected abstract String getViewId(Exception e);
-   protected abstract String getMessage(Exception e);
-   protected abstract boolean isEnd(Exception e);
-   protected abstract Severity getMessageSeverity(Exception e);
+    protected abstract String getViewId(Exception e);
 
-   @Override
-   public void handle(Exception e) throws Exception
-   {
-      String viewId = getViewId(e);
-      if (viewId==null)
-      {
-         //we want to perform a redirect straight back to the current page
-         //there is no ViewRoot available, so lets do it the hard way
-         String servletPath = ( (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest() ).getServletPath();
-         viewId = servletPath.substring(0, servletPath.lastIndexOf('.')) + Pages.getSuffix();
-      }
-      
-      addFacesMessage( "#0", getMessageSeverity(e), null, getDisplayMessage(e, getMessage(e)));
-      
-      if ( Contexts.isConversationContextActive() && isEnd(e) ) 
-      {
-         Conversation.instance().end();
-      }
-      
-      try
-      {
-         redirect(viewId, null);
-      }
-      catch (RedirectException re)
-      {
-         //do nothing
-         log.debug("could not redirect", re);
-      }
-   }
+    protected abstract String getMessage(Exception e);
 
-   @Override
-   public String toString()
-   {
-      return "RedirectHandler";
-   }
+    protected abstract boolean isEnd(Exception e);
+
+    protected abstract boolean includePageParameters(Exception e);
+
+    protected abstract Severity getMessageSeverity(Exception e);
+
+    @Override
+    public void handle(Exception e) throws Exception
+    {
+        String viewId = getViewId(e);
+        if (viewId == null)
+        {
+            // we want to perform a redirect straight back to the current page
+            // there is no ViewRoot available, so lets do it the hard way
+            String servletPath = ((HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest())
+                    .getServletPath();
+            viewId = servletPath.substring(0, servletPath.lastIndexOf('.')) + Pages.getSuffix();
+        }
+
+        addFacesMessage("#0", getMessageSeverity(e), null, getDisplayMessage(e, getMessage(e)));
+
+        if (Contexts.isConversationContextActive() && isEnd(e))
+        {
+            Conversation.instance().end();
+        }
+
+        try
+        {
+            if (includePageParameters(e))
+            {
+                Map<String, Object> parameters = Pages.instance().getStringValuesFromPageContext(FacesContext.getCurrentInstance());
+                if (e instanceof ParametricExceptionHandler)
+                    parameters = ((ParametricExceptionHandler) e).getParameters();
+                parameters.remove("actionMethod");
+                redirect(viewId, parameters);
+            }
+            else
+            {
+                redirect(viewId, null);
+            }
+        }
+        catch (RedirectException re)
+        {
+            // do nothing
+            log.debug("could not redirect", re);
+        }
+    }
+
+    @Override
+    public String toString()
+    {
+        return "RedirectHandler";
+    }
 }

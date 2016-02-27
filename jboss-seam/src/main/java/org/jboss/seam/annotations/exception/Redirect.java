@@ -42,4 +42,9 @@ public @interface Redirect
     * @deprecated use @ApplicationException(end=true)
     */
    boolean end() default false;
+   /**
+    * 
+    * @return true if we should include page parameters
+    */
+   boolean includePageParameters() default false;
 }

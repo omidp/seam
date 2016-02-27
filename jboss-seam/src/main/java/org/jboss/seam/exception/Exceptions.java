@@ -222,13 +222,15 @@ public class Exceptions
       {
          String viewId = redirect.attributeValue("view-id");
          Element messageElement = redirect.element("message");
+         String includePageParams = redirect.attributeValue("include-page-params");
+         boolean includePageParameters = includePageParams == null ? false : Boolean.parseBoolean(includePageParams.trim());
          final String message = messageElement==null ? null : messageElement.getTextTrim();
          String severityName = messageElement==null ? null : messageElement.attributeValue("severity");
          Severity severity = severityName==null ? 
                   FacesMessage.SEVERITY_INFO : 
                   Pages.getFacesMessageValuesMap().get( severityName.toUpperCase() );
          return new ConfigRedirectHandler(viewId == null ? null : Expressions.instance().createValueExpression(
-               viewId, String.class), clazz, endConversation, message, severity);
+               viewId, String.class), clazz, endConversation, message, severity, includePageParameters);
       }
       
       Element error = exception.element("http-error");
