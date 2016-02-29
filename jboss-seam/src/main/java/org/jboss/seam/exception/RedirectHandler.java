@@ -38,7 +38,7 @@ public abstract class RedirectHandler extends ExceptionHandler
     public void handle(Exception e) throws Exception
     {
         String viewId = getViewId(e);
-        if (viewId == null)
+        if (viewId == null || viewId.trim().length() == 0)
         {
             // we want to perform a redirect straight back to the current page
             // there is no ViewRoot available, so lets do it the hard way
@@ -47,7 +47,10 @@ public abstract class RedirectHandler extends ExceptionHandler
             viewId = servletPath.substring(0, servletPath.lastIndexOf('.')) + Pages.getSuffix();
         }
 
-        addFacesMessage("#0", getMessageSeverity(e), null, getDisplayMessage(e, getMessage(e)));
+        if (e instanceof ParametricExceptionHandler)
+            addFacesMessage("#0", ((ParametricExceptionHandler) e).getMessageSeverity(), null, getDisplayMessage(e, getMessage(e)));
+        else
+            addFacesMessage("#0", getMessageSeverity(e), null, getDisplayMessage(e, getMessage(e)));
 
         if (Contexts.isConversationContextActive() && isEnd(e))
         {

@@ -33,7 +33,7 @@ public @interface Redirect
     * 
     * @return a JSF view id
     */
-   String viewId();
+   String viewId() default "";
    /**
     * Should the current long-running conversation end
     * when this exception occurs.
