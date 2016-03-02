@@ -64,7 +64,8 @@ public abstract class RedirectHandler extends ExceptionHandler
                 Map<String, Object> parameters = Pages.instance().getStringValuesFromPageContext(FacesContext.getCurrentInstance());
                 if (e instanceof ParametricExceptionHandler)
                     parameters = ((ParametricExceptionHandler) e).getParameters();
-                parameters.remove("actionMethod");
+                if(parameters != null)
+                    parameters.remove("actionMethod");
                 redirect(viewId, parameters);
             }
             else
