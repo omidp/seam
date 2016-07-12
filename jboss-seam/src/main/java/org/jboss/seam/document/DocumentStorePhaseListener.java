@@ -1,11 +1,14 @@
 package org.jboss.seam.document;
 
 import java.io.IOException;
+import java.net.URLEncoder;
 
 import javax.faces.context.FacesContext;
 import javax.faces.event.PhaseEvent;
 import javax.faces.event.PhaseId;
 import javax.faces.event.PhaseListener;
+import javax.mail.internet.MimeUtility;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.jboss.seam.log.LogProvider;
@@ -51,9 +54,13 @@ public class DocumentStorePhaseListener implements PhaseListener
          {
 
             HttpServletResponse response = (HttpServletResponse) context.getExternalContext().getResponse();
+            HttpServletRequest request =  (HttpServletRequest) context.getExternalContext().getRequest();
             response.setContentType(documentData.getDocumentType().getMimeType());
 
-            response.setHeader("Content-Disposition", documentData.getDisposition() + "; filename=\"" + documentData.getFileName() + "\"");
+            if(isInternetExplorer(request))
+                response.setHeader("Content-Disposition", documentData.getDisposition() + "; filename=\"" + URLEncoder.encode(documentData.getFileName(), "utf-8") + "\"");
+            else
+                response.setHeader("Content-Disposition", documentData.getDisposition() + "; filename=\"" + MimeUtility.encodeWord(documentData.getFileName(), "UTF-8", "Q") + "\"");
 
             documentData.writeDataToStream(response.getOutputStream());
             context.responseComplete();
@@ -63,6 +70,12 @@ public class DocumentStorePhaseListener implements PhaseListener
       {
          log.warn(e);
       }
+   }
+   
+   private boolean isInternetExplorer(HttpServletRequest request)
+   {
+       String userAgent = request.getHeader("user-agent");
+       return (userAgent.indexOf("MSIE") > -1);
    }
 
 }
