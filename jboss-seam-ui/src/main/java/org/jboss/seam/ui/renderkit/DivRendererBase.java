@@ -30,6 +30,11 @@ public class DivRendererBase extends StyleRendererBase
       {
           writer.writeAttribute("title", String.valueOf(title), "title");
       }
+      Object onclick = style.getAttributes().get("onclick");
+      if(onclick != null)
+      {
+          writer.writeAttribute("onclick", String.valueOf(onclick), "onclick");
+      }
    }
    
 }
