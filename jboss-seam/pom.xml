@@ -37,6 +37,7 @@
                  <artifactId>maven-javadoc-plugin</artifactId>
                  <version>2.7</version>
                  <configuration>
+					 <additionalparam>${javadoc.opts}</additionalparam>
                      <links>
                          <link>http://java.sun.com/j2se/5.0/docs/api</link>
                      </links>
